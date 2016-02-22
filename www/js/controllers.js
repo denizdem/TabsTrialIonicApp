@@ -187,7 +187,7 @@ angular.module('starter.controllers', [])
   }
 })
 
-.controller('OrderNotAssignedCtrl', function($scope, $ionicPopup, $ionicLoading, $state, OrderService) {
+.controller('OrderNotAssignedCtrl', function($scope, $ionicPopup, $ionicHistory, $ionicLoading, $state, OrderService) {
 
   $scope.refresh = function() {
 
