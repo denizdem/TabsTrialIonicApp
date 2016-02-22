@@ -56,25 +56,18 @@ angular.module('starter.services', [])
     },
     webApiToken : function() {
       return this.webApiBase() + '/token';
+    },
+    webApiCourier : function() {
+      return this.webApiBase() + '/courier';
+    },
+    webApiOrder : function() {
+      return this.webApiCourier() + '/order';
+    },
+    webApiPaymentMethods : function() {
+      return this.webApiBase() + '/paymentMethods';
     }
   }
 })
-
-// .factory('StorageService', function() {
-//   return {
-//     saveToPath: function(path, data) {
-//       window.localStorage.setItem(path, data);
-//     },
-
-//     loadFromPath: function(path) {
-//       return window.localStorage.getItem(path);
-//     },
-
-//     deletePath: function(path) {
-//       window.localStorage.removeItem(path);
-//     }
-//   }
-// })
 
 .factory('$localstorage', ['$window', function($window) {
   return {
@@ -101,7 +94,19 @@ angular.module('starter.services', [])
   }
 }])
 
-.factory('LoginService', function($q, $http, $localstorage, ConstantsService) {
+.factory('HttpHeaderService', function($http, ConstantsService) {
+
+  return {
+    addDefaultAuthHeader: function(authToken) {
+      $http.defaults.headers.common['Authorization'] = 'Baerer ' + authToken.Token;
+    },
+    removeDefaultAuthHeader: function() {
+      $http.defaults.headers.common.Authorization = '';
+    }
+  }
+})
+
+.factory('LoginService', function($q, $http, $localstorage, ConstantsService, HttpHeaderService) {
     var CREDENTIALS_KEY = "CREDENTIALS";
     var TOKEN_KEY = "USERTOKEN";
 
@@ -123,17 +128,17 @@ angular.module('starter.services', [])
       },
 
       /////////////////////////////////////////////////
-      saveToken: function(token) {
+      saveAuthToken: function(token) {
         $localstorage.setObject(TOKEN_KEY, token);
       },
 
       /////////////////////////////////////////////////
-      loadToken: function() {
+      loadAuthToken: function() {
         return $localstorage.getObject(TOKEN_KEY);
       },
 
       /////////////////////////////////////////////////
-      deleteToken: function() {
+      deleteAuthToken: function() {
         $localstorage.clear(TOKEN_KEY);
       },
 
@@ -141,18 +146,22 @@ angular.module('starter.services', [])
       loginUser: function(userName, password) {
 
         var self = this;
-        var deferred = $q.defer();
+        // var deferred = $q.defer();
 
-        return $http.post(ConstantsService.webApiToken(), {Email: userName, Password: password}, {headers:{'Content-Type':'application/json'}}).success(function(data, status, headers, config) {
+        var postData = {Email: userName, Password: password};
+        return $http.post(ConstantsService.webApiToken(), postData).success(function(data, status, headers, config) {
             console.log('basarili');
 
             // Save the credentials for future
             self.saveCredentials(userName, password);
 
             // Save the token as well
-            self.saveToken(data);
+            self.saveAuthToken(data);
 
-            deferred.resolve(data);
+            // Add the newly retrieved user credentials for further
+            HttpHeaderService.addDefaultAuthHeader(data);
+
+            // deferred.resolve(data);
           }).error(function(data, status, headers, config) {
             console.log('basarisiz');
 
@@ -160,8 +169,106 @@ angular.module('starter.services', [])
             self.deleteToken();
             self.deleteCredentials();
 
-            deferred.reject(data);
+            // deferred.reject(data);
           });
+      },
+
+      /////////////////////////////////////////////////
+      logoutUser: function() {
+        this.deleteCredentials();
+        this.deleteAuthToken();
+
+        HttpHeaderService.removeDefaultAuthHeader();
+
+        // TODO: More cleanup about current user etc.
       }
     }
-});
+})
+
+.factory('UserService', function($q) {
+
+  var currentUser = null;
+
+  return {
+
+    /////////////////////////////////////////////////
+    setAsCurrent: function(user) {
+      currentUser = user;
+      return user;
+    },
+
+    /////////////////////////////////////////////////
+    getCurrent: function() {
+      return user;
+    }
+  }
+})
+
+.factory('CourierService', function($q, $http, ConstantsService) {
+
+  return {
+
+    /////////////////////////////////////////////////
+    getCourier: function() {
+      return $q(function(resolve, reject) {
+        $http.get(ConstantsService.webApiCourier()).success(function(data, status, headers, config) {
+          console.log(data);
+          resolve(data);
+        }).error(function(data, status, headers, config) {
+          console.log(data);
+          reject();
+        });
+      });
+    }
+  }
+})
+
+.factory('OrderService', function($q, $http, ConstantsService) {
+
+  var self = this;
+  var currentOrder = null;
+
+  return {
+
+    /////////////////////////////////////////////////
+    getCurrentOrder: function() {
+      return self.currentOrder;
+    },
+
+    /////////////////////////////////////////////////
+    getOrder: function() {
+      return $q(function(resolve, reject) {
+        $http.get(ConstantsService.webApiOrder()).success(function(data, status, headers, config) {
+          console.log(data);
+          self.currentOrder = data;
+          resolve(data);
+        }).error(function(data, status, headers, config) {
+          console.log(data);
+          self.currentOrder = null;
+          reject();
+        });
+      });
+    },
+
+    /////////////////////////////////////////////////
+    updateOrderStateToCourierWithClientAsync: function() {
+      return $q(function(resolve, reject) {
+
+        var postData = {OrderId: self.currentOrder.Id, Status: OrderStatusEnum.CourierWithClient};
+
+        $http.post(ConstantsService.webApiOrder(), postData).success(function(data, status, headers, config) {
+          console.log(data);
+          // TODO: DenizDem - Should the request return the order again, so that we can be sure?
+          self.currentOrder.Status = OrderStatusEnum.CourierWithClient;
+          resolve(self.currentOrder);
+        }).error(function(data, status, headers, config) {
+          console.log(data);
+          reject(status);
+        });
+      });
+    }
+
+  }
+})
+
+;

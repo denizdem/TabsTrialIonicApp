@@ -40,44 +40,84 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
 
   // Each tab has its own nav history stack:
 
-  .state('tab.dash', {
-    url: '/dash',
+  .state('tab.order', {
+    url: '/order',
+    abstract: true,
     views: {
-      'tab-dash': {
-        templateUrl: 'templates/tab-dash.html',
-        controller: 'DashCtrl'
+      'tab-order': {
+      templateUrl: 'templates/tab-order.html',
       }
     }
   })
 
-  .state('tab.chats', {
-      url: '/chats',
-      views: {
-        'tab-chats': {
-          templateUrl: 'templates/tab-chats.html',
-          controller: 'ChatsCtrl'
-        }
-      }
-    })
-    .state('tab.chat-detail', {
-      url: '/chats/:chatId',
-      views: {
-        'tab-chats': {
-          templateUrl: 'templates/chat-detail.html',
-          controller: 'ChatDetailCtrl'
-        }
-      }
-    })
-
-  .state('tab.account', {
-    url: '/account',
+  .state('tab.order.notAssigned', {
+    url: '/notAssigned',
     views: {
-      'tab-account': {
-        templateUrl: 'templates/tab-account.html',
-        controller: 'AccountCtrl'
+      'tab-order-master': {
+      templateUrl: 'templates/tab-order-notAssigned.html',
+      controller: 'OrderNotAssignedCtrl'
       }
     }
   })
+
+  .state('tab.order.courierAssigned', {
+    url: '/courierAssigned',
+    views: {
+      'tab-order-master': {
+      templateUrl: 'templates/tab-order-courierAssigned.html',
+      controller: 'OrderCourierAssignedCtrl'
+      }
+    }
+  })
+
+  .state('tab.order.courierWithClient', {
+    url: '/courierWithClient',
+    views: {
+      'tab-order-master': {
+      templateUrl: 'templates/tab-order-courierWithClient.html',
+      controller: 'OrderCourierWithClientCtrl'
+      }
+    }
+  })
+
+  .state('tab.order.courierLeftClient', {
+    url: '/courierLeftClient',
+    views: {
+      'tab-order-master': {
+      templateUrl: 'templates/tab-order-courierLeftClient.html',
+      controller: 'OrderCourierLeftClientCtrl'
+      }
+    }
+  })
+
+  // .state('tab.chats', {
+  //     url: '/chats',
+  //     views: {
+  //       'tab-chats': {
+  //         templateUrl: 'templates/tab-chats.html',
+  //         controller: 'ChatsCtrl'
+  //       }
+  //     }
+  //   })
+  //   .state('tab.chat-detail', {
+  //     url: '/chats/:chatId',
+  //     views: {
+  //       'tab-chats': {
+  //         templateUrl: 'templates/chat-detail.html',
+  //         controller: 'ChatDetailCtrl'
+  //       }
+  //     }
+  //   })
+
+  // .state('tab.account', {
+  //   url: '/account',
+  //   views: {
+  //     'tab-account': {
+  //       templateUrl: 'templates/tab-account.html',
+  //       controller: 'AccountCtrl'
+  //     }
+  //   }
+  // })
 
   .state('account', {
       url: '/account',
