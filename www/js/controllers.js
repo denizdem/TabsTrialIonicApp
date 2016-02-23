@@ -211,7 +211,7 @@ angular.module('starter.controllers', [])
   }
 })
 
-.controller('OrderCourierAssignedCtrl', function($scope, $ionicLoading, $ionicHistory, $state, OrderService) {
+.controller('OrderCourierAssignedCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, OrderService) {
 
   $scope.$on('$ionicView.enter', function(e) {
     $scope.order = OrderService.getCurrentOrder();
@@ -224,7 +224,7 @@ angular.module('starter.controllers', [])
 
     $ionicLoading.show(templateOfLoading);
 
-    OrderService.updateOrderStateToCourierWithClientAsync().then(function(order) {
+    OrderService.updateOrderStateToCourierWithClient().then(function(order) {
       // resolve
 
       $ionicHistory.clearHistory();
@@ -254,7 +254,7 @@ angular.module('starter.controllers', [])
 
 })
 
-.controller('OrderCourierWithClientCtrl', function($scope, $ionicLoading, $ionicHistory, $state, OrderService) {
+.controller('OrderCourierWithClientCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, OrderService) {
 
   $scope.$on('$ionicView.enter', function(e) {
     $scope.order = OrderService.getCurrentOrder();
@@ -263,11 +263,13 @@ angular.module('starter.controllers', [])
   $scope.isClientDetailsExpanded = true;
   $scope.isOpDetailsExpanded = false;
 
-  $scope.arriveAtClient = function() {
+  $scope.choosePackages = function() {
 
     $ionicLoading.show(templateOfLoading);
 
-    OrderService.updateOrderStateToCourierWithClientAsync().then(function(order) {
+    // TODO: DenizDem - We would go to the package selection screen here, which we don't
+    // have at the moment. For now, go ahead and switch to state to courierLeftClient
+    OrderService.updateOrderStateToCourierLeftClient().then(function(order) {
       // resolve
 
       $ionicHistory.clearHistory();
@@ -290,11 +292,162 @@ angular.module('starter.controllers', [])
   $scope.toggleOpDetailsExpanded = function() {
     $scope.isOpDetailsExpanded = !$scope.isOpDetailsExpanded;
   },
-  
+
   $scope.toggleClientDetailsExpanded = function() {
     $scope.isClientDetailsExpanded = !$scope.isClientDetailsExpanded;
   }
 
+})
+
+.controller('OrderCourierLeftClientCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, OrderService) {
+
+  $scope.$on('$ionicView.enter', function(e) {
+    $scope.order = OrderService.getCurrentOrder();
+  });
+
+  $scope.isDeliveryDetailsExpanded = true;
+  $scope.isClientDetailsExpanded = false;
+  $scope.isOpDetailsExpanded = false;
+
+  $scope.choosePaymentDetails = function() {
+
+    $ionicLoading.show(templateOfLoading);
+
+    // Get the latest payment methods
+    var self = this;
+    OrderService.refreshPaymentMethodsIfNecessary().then(function(paymentMethods) {
+      // resolve
+
+      $ionicLoading.hide();
+      // Go to the payment details page
+      var url = 'tab.order.paymentDetails/' + self.order.ProposedTotal + '/' + self.order.ProposedPaymentMethod.Id;
+      $state.go('tab.order.paymentDetails', { proposedTotal: self.order.ProposedTotal, proposedPaymentMethodId: self.order.ProposedPaymentMethod });
+    }, function(status) {
+      // reject
+
+      $ionicLoading.hide();
+      var alertPopup = $ionicPopup.alert({
+        title: 'Ödeme tiplerini alırken hata oluştu.',
+        template: 'Hata: ' + status
+      });
+    });
+  },
+
+  $scope.toggleOpDetailsExpanded = function() {
+    $scope.isOpDetailsExpanded = !$scope.isOpDetailsExpanded;
+  },
+
+  $scope.toggleDeliveryDetailsExpanded = function() {
+    $scope.isDeliveryDetailsExpanded = !$scope.isDeliveryDetailsExpanded;
+  },
+
+  $scope.toggleClientDetailsExpanded = function() {
+    $scope.isClientDetailsExpanded = !$scope.isClientDetailsExpanded;
+  }
+
+})
+
+.controller('OrderPaymentDetailsCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, OrderService) {
+
+  $scope.$on('$ionicView.enter', function(e) {
+    $scope.order = OrderService.getCurrentOrder();
+  });
+
+  $scope.order = OrderService.getCurrentOrder();
+  // Reset payment variables to proposed ones
+  $scope.order.Total = $scope.order.ProposedTotal;
+  $scope.order.PaymentMethod = $scope.order.ProposedPaymentMethod;
+
+  $scope.canEditPayment = false;
+
+  $scope.toggleCanEdit = function() {
+    $scope.canEditPayment = !$scope.canEditPayment;
+
+    if (!$scope.canEditPayment) {
+      $scope.order.Total = $scope.order.ProposedTotal;
+      $scope.order.PaymentMethod = $scope.order.ProposedPaymentMethod;
+    }
+  },
+
+  $scope.paymentMethodClicked = function() {
+    if ($scope.canEditPayment)
+      $state.go('tab.order.paymentMethod');
+  },
+
+  $scope.closePackage = function() {
+
+    // Close the order
+    var self = this;
+
+    $ionicLoading.show(templateOfLoading);
+    OrderService.updateOrderStateToDelivered().then(function(order) {
+      // resolve
+
+      $ionicLoading.hide();
+
+      var alertPopup = $ionicPopup.alert({
+        title: 'Sipariş başarıyla kapatıldı.',
+        okText: 'Tamam'
+      }).then(function() {
+        // We redirect to welcome page, which would re-read the courier
+        $state.go('account.welcome');
+      });;
+    }, function(status) {
+      // reject
+
+      $ionicLoading.hide();
+      var alertPopup = $ionicPopup.alert({
+        title: 'Sipariş kapatılırken hata oluştu.',
+        template: 'Hata: ' + status
+      });
+    });
+
+    // $ionicLoading.show(templateOfLoading);
+
+    // OrderService.updateOrderStateToCourierLeftClient().then(function(order) {
+    //   // resolve
+
+    //   $ionicHistory.clearHistory();
+    //   $ionicHistory.nextViewOptions({ disableBack: true });
+
+    //   $ionicLoading.hide();
+
+    //   checkCourierOrderStateAndNavigate($state, order);
+    // }, function(status) {
+    //   // reject
+
+    //   var alertPopup = $ionicPopup.alert({
+    //     title: 'Bir hata oluştu.',
+    //     template: 'Hata: ' + status
+    //   });
+
+    // });
+  }
+})
+
+.controller('OrderPaymentMethodCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, OrderService) {
+
+  $scope.$on('$ionicView.enter', function(e) {
+    $scope.order = OrderService.getCurrentOrder();
+    $scope.paymentMethods = OrderService.getPaymentMethods();
+  });
+
+  $scope.selectPaymentMethod = function(paymentMethodId) {
+
+    for(var i = 0; i < $scope.paymentMethods.length; ++i) {
+      if ($scope.paymentMethods[i].Id == paymentMethodId) {
+        $scope.order.PaymentMethod = $scope.paymentMethods[i];
+        break;
+      }
+    }
+
+    // We have selected the new paymentMethod. Go back.
+    $ionicHistory.goBack();
+  },
+
+  $scope.isPaymentMethodSelected = function(paymentMethodId) {
+    return $scope.order.PaymentMethod.Id == paymentMethodId;
+  }
 })
 
 

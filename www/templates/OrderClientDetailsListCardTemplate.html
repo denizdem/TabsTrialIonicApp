@@ -1,0 +1,48 @@
+    <div class="list card">
+
+      <ion-item class="item-divider" ng-click="toggleClientDetailsExpanded()">
+        <h3>Restoran: {{order.Client.Name}}</h3>
+<!--         <a href="#" class="item-icon-right">
+          <i class="icon ion-minus"></i>
+        </a>
+ -->      </ion-item>
+
+      <ion-item class="item" ng-show="isClientDetailsExpanded">
+
+          <span class="input-label positive text-bold">Adres</span>
+          <span class="item-text-wrap">{{order.Client.Address}}</span>
+          <hr>
+          <span class="input-label positive text-bold">Tarif</span>
+          <span class="item-text-wrap">{{order.Client.AddressDescription}}</span>
+          <hr>
+          <span class="input-label positive text-bold">
+            Telefon:
+            <a class="padding-left" ng-href="tel: 0{{order.Client.Phone}}">{{order.Client.Phone}}</a>
+          </span>
+          <hr>
+          <span class="input-label positive text-bold">
+            İrtibat:
+            <a class="padding-left" ng-href="tel: 0{{order.Client.ContactPhone}}">{{order.Client.ContactName}}</a>
+          </span>
+
+
+<!--         </div>
+        <select mobi_select_picker=true data-role="none">
+          <option value=''>Bar</option>
+          <option value='1'>Baz</option>
+          <option value='2'>Char</option>
+        </select>
+
+       </div>
+ -->    
+<!--         <div class="list list-inset">
+          <button class="button button-block button-energized" ng-click="callClient()">
+            <i class="icon icon-left ion-ios-telephone-outline"></i>
+            Ara
+          </button>
+        </div>
+ -->
+      </ion-item> <!-- Item Content -->
+
+    </div> <!-- List Item -->
+

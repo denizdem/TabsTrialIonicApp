@@ -1,0 +1,34 @@
+    <div class="list card">
+
+      <ion-item class="item-divider" ng-click="toggleDeliveryDetailsExpanded()">
+        <h3>Detaylar</h3>
+      </ion-item>
+
+      <ion-item class="item" ng-show="isDeliveryDetailsExpanded">
+          <span class="input-label positive text-bold">Adres</span>
+          <span class="item-text-wrap">{{order.DeliveryAddress}}</span>
+          <hr>
+          <span class="input-label positive text-bold">Notlar</span>
+          <span class="item-text-wrap">{{order.ClientNotes}}</span>
+          <hr>
+          <span class="input-label positive" style="display:inline-block">
+            Tutar:
+          </span>
+          <span style="display:inline-block">{{order.ProposedTotal}}</span>
+          <hr>
+          <span class="input-label positive" style="display:inline-block">
+            Ödeme Tipi:
+          </span>
+          <span style="display:inline-block">{{order.ProposedPaymentMethod.Name}}</span>
+          <hr>
+
+        <div class="list list-inset">
+          <a class="button button-block button-energized" ng-href="tel: 0{{order.EndUserPhone}}">
+            <i class="icon icon-left ion-ios-telephone-outline"></i>
+            Müşteriyi Ara
+          </a>
+        </div>
+     </ion-item> <!-- Item Content -->
+
+    </div> <!-- List Item -->
+

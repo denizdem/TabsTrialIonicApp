@@ -1,12 +1,18 @@
-<ion-view view-title="Açık Sipariş Yok" name="order-notAssigned-view">
-  <ion-content class="padding">
-      <div class="list list-inset">
-          <label class="item item-input">
-            Şu anda adınıza atanmış sipariş bulunmuyor.
-          </label>
-          <label class="item item-input">
-            <button class="button button-block button-calm" ng-click="refresh()">Yenile</button>
-          </label>
-      </div>
+<ion-view view-title="Açık Sipariş Yok" name="order-courierWithClient-view" >
+
+  <ion-content class="" ng-model="order">
+    <br/>
+    <h3 class="title text-center">Lütfen paketleri teslim alınız.</h3>
+
+    <div ng-include src="'templates/OrderClientDetailsListCardTemplate.html'"></div>
+    <div ng-include src="'templates/OrderOpDetailsListCardTemplate.html'"></div>
+
+    <div class="list list-inset">
+        <button class="button button-block button-balanced" ng-click="choosePackages()">
+          <i class="icon icon-left ion-ios-chart"></i>
+          Paketleri Seç
+        </button>
+    </div>
+
   </ion-content>
 </ion-view>

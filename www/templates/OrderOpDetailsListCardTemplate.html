@@ -1,0 +1,14 @@
+    <div class="list card">
+      <div class="item item-divider" ng-click="toggleOpDetailsExpanded()">
+        <h3>Operator: {{order.Operator.FullName}}</h3>
+      </div>
+
+      <div class="item" ng-show="isOpDetailsExpanded">
+          <span class="input-label positive text-bold">
+            Telefon:
+            <a class="padding-left" ng-href="tel: 0{{order.Operator.Phone}}">{{order.Operator.Phone}}</a>
+          </span>
+      </div> <!-- Item Content -->
+
+    </div> <!-- List Item -->
+

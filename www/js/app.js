@@ -90,6 +90,27 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     }
   })
 
+  .state('tab.order.paymentDetails', {
+    url: '/paymentDetails',
+    params: { proposedTotal:null, proposedPaymentMethodId:null },
+    views: {
+      'tab-order-master': {
+      templateUrl: 'templates/tab-order-paymentDetails.html',
+      controller: 'OrderPaymentDetailsCtrl'
+      }
+    }
+  })
+
+  .state('tab.order.paymentMethod', {
+    url: '/paymentMethod',
+    views: {
+      'tab-order-master': {
+      templateUrl: 'templates/tab-order-paymentMethod.html',
+      controller: 'OrderPaymentMethodCtrl'
+      }
+    }
+  })
+
   // .state('tab.chats', {
   //     url: '/chats',
   //     views: {

@@ -1,0 +1,38 @@
+<ion-view view-title="Ödeme Detayları" name="order-paymentDetails-view" >
+
+  <ion-content class="" ng-model="order">
+
+    <br/>
+    <h3 class="title text-center">Ödeme Bilgierini Giriniz</h3>
+
+    <div class="list">
+
+      <ion-toggle class="item" ng-click="toggleCanEdit()" toggle-class="toggle-balanced">Bilgileri Düzelt</ion-toggle>
+
+      <ion-item class="item item-icon-left">
+        <i class="icon ion-cash"></i>
+        Tutar
+        <label class="item-input">
+          <input type="number" ng-disabled="!canEditPayment" ng-model="order.Total"></input>
+        </label>
+      </ion-item>
+
+      <ion-item class="item item-icon-left" ng-click="paymentMethodClicked()">
+        <i class="icon ion-card"></i>
+        Ödeme Tipi
+        <span class="item-note" >
+          {{order.PaymentMethod.Name}} <label ng-style="{'display': canEditPayment ? 'inline':'none'}"> > </label>
+        </span>
+      </ion-item>
+
+    </div>
+
+    <div class="list list-inset">
+        <button class="button button-block button-balanced" ng-click="closePackage()">
+          <i class="icon icon-left ion-ios-checkmark-outline"></i>
+          Siparişi Kapat
+        </button>
+    </div>
+
+  </ion-content>
+</ion-view>

@@ -227,12 +227,18 @@ angular.module('starter.services', [])
 
   var self = this;
   var currentOrder = null;
+  var paymentMethods = null;
 
   return {
 
     /////////////////////////////////////////////////
     getCurrentOrder: function() {
       return self.currentOrder;
+    },
+
+    /////////////////////////////////////////////////
+    getPaymentMethods: function() {
+      return self.paymentMethods;
     },
 
     /////////////////////////////////////////////////
@@ -251,7 +257,44 @@ angular.module('starter.services', [])
     },
 
     /////////////////////////////////////////////////
-    updateOrderStateToCourierWithClientAsync: function() {
+    refreshPaymentMethods: function() {
+      return $q(function(resolve, reject) {
+        $http.get(ConstantsService.webApiPaymentMethods()).success(function(data, status, headers, config) {
+          console.log(data);
+          self.paymentMethods = data;
+          resolve(data);
+        }).error(function(data, status, headers, config) {
+          console.log(data);
+          self.paymentMethods = null;
+          reject();
+        });
+      });
+    },
+
+    /////////////////////////////////////////////////
+    refreshPaymentMethodsIfNecessary: function() {
+      return $q(function(resolve, reject) {
+        if (self.paymentMethods != null)
+        {
+          resolve(self.paymentMethods);
+        }
+        else
+        {
+          $http.get(ConstantsService.webApiPaymentMethods()).success(function(data, status, headers, config) {
+            console.log(data);
+            self.paymentMethods = data;
+            resolve(data);
+          }).error(function(data, status, headers, config) {
+            console.log(data);
+            self.paymentMethods = null;
+            reject(status);
+          });
+        }
+      });
+    },
+
+    /////////////////////////////////////////////////
+    updateOrderStateToCourierWithClient: function() {
       return $q(function(resolve, reject) {
 
         var postData = {OrderId: self.currentOrder.Id, Status: OrderStatusEnum.CourierWithClient};
@@ -261,6 +304,49 @@ angular.module('starter.services', [])
           // TODO: DenizDem - Should the request return the order again, so that we can be sure?
           self.currentOrder.Status = OrderStatusEnum.CourierWithClient;
           resolve(self.currentOrder);
+        }).error(function(data, status, headers, config) {
+          console.log(data);
+          reject(status);
+        });
+      });
+    },
+
+    /////////////////////////////////////////////////
+    updateOrderStateToCourierLeftClient: function() {
+      return $q(function(resolve, reject) {
+
+        var postData = {OrderId: self.currentOrder.Id, Status: OrderStatusEnum.CourierLeftClient};
+
+        $http.post(ConstantsService.webApiOrder(), postData).success(function(data, status, headers, config) {
+          console.log(data);
+          // TODO: DenizDem - Should the request return the order again, so that we can be sure?
+          self.currentOrder.Status = OrderStatusEnum.CourierLeftClient;
+          resolve(self.currentOrder);
+        }).error(function(data, status, headers, config) {
+          console.log(data);
+          reject(status);
+        });
+      });
+    },
+
+    /////////////////////////////////////////////////
+    updateOrderStateToDelivered: function() {
+      return $q(function(resolve, reject) {
+
+        var postData = {
+          OrderId: self.currentOrder.Id,
+          Status: OrderStatusEnum.Delivered,
+          Total: self.currentOrder.Total,
+          PaymentMethodId: self.currentOrder.PaymentMethod.Id
+        };
+
+        $http.post(ConstantsService.webApiOrder(), postData).success(function(data, status, headers, config) {
+          console.log(data);
+          // TODO: DenizDem - Should the request return the order again, so that we can be sure?
+          self.currentOrder.Status = OrderStatusEnum.Delivered;
+          var resultOrder = self.currentOrder;
+          self.currentOrder = null;
+          resolve(resultOrder);
         }).error(function(data, status, headers, config) {
           console.log(data);
           reject(status);

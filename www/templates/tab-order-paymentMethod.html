@@ -1,0 +1,16 @@
+<ion-view view-title="Ödeme Aracı" name="order-paymentMethods-view" >
+
+  <ion-content class="" ng-model="order">
+    <br>
+
+    <div class="list">
+
+      <a ng-repeat="paymentMethod in paymentMethods" class="item item-icon-right" ng-click="selectPaymentMethod(paymentMethod.Id)">
+        {{paymentMethod.Name}}
+        <i class="icon ion-ios-checkmark-empty" ng-show="isPaymentMethodSelected(paymentMethod.Id)"></i>
+      </a>
+
+    </div>
+
+  </ion-content>
+</ion-view>
