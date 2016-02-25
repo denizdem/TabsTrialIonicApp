@@ -451,15 +451,85 @@ angular.module('starter.controllers', [])
     $scope.courier = CourierService.getCurrentCourier();
   });
 
-  // TODO: DenizDem - Retrieve these from web api
-  var testPackages = [
-    { Id :1,
-      
-    },
+  var self = this;
 
-    {
-    }
-  ];
+  // TODO: DenizDem - Retrieve these from web api
+
+  var testOperator = {
+    Id: 3,
+    Name: 'DevranTest',
+    Surname: 'KaramanTest',
+    Phone: '(123)4567890',
+    Phone2: '(321)4567890',
+    FullName: 'DevranTest KaramanTest'
+  };
+
+  var testOperator2 = {
+    Id: 5,
+    Name: 'OpTest',
+    Surname: 'OpSurTest',
+    Phone: '(123)0987654',
+    Phone2: '(321)0987654',
+    FullName: 'OpTest OpSurTest'
+  };
+
+  var testClient = {
+    Id: 101,
+    Name: 'Demo1',
+    FullName: 'Demo1 A.S.',
+    Phone: '(890)1234567',
+    Phone2: '(890)7654321',
+    Phone3: '(098)1234567',
+    Address: 'Demo Address',
+    AddressDescription: 'Adres tarifi for Demo1 restaurant',
+    ContactName: 'Ali',
+    ContactPhone: '(345)1267890'
+  };
+
+  var testClient = {
+    Id: 102,
+    Name: 'Demo2',
+    FullName: 'Demo2 A.S.',
+    Phone: '(890)1234567',
+    Phone2: '(890)7654321',
+    Phone3: '(098)1234567',
+    Address: 'Demo Address2',
+    AddressDescription: 'Adres tarifi for Demo2 restaurant',
+    ContactName: 'Veli',
+    ContactPhone: '(543)1267890'
+  };
+
+  var testPackages = [{
+    Id: 1,
+    EntryDate: new Date(),
+    ClientArrivalDate: new Date(),
+    ClientDepartureDate: new Date(),
+    ProposedTotal: 15.00,
+    Total: 16.00,
+    ProposedPaymentMethod: { Id: 1, Name: 'Nakit'},
+    PaymentMethod: { Id: 2, Name: 'Kredi Karti'},
+    DeliveryAddress: 'Flan filan adresi. Sekizinci kat.',
+    ClientNotes: 'Notes client has entered for the order.',
+    Operator: testOperator,
+    Client: testClient,
+    EndUserPhone: '(098)7654321'
+  },{
+    Id: 2,
+    EntryDate: new Date(),
+    ClientArrivalDate: new Date(),
+    ClientDepartureDate: new Date(),
+    ProposedTotal: 23.00,
+    Total: 22.00,
+    ProposedPaymentMethod: { Id: 2, Name: 'Kredi Karti'},
+    PaymentMethod: { Id: 1, Name: 'Nakit'},
+    DeliveryAddress: 'Adres 2.',
+    ClientNotes: 'Notes2 client has entered for the order.',
+    Operator: testOperator2,
+    Client: testClient,
+    EndUserPhone: '(098)7654321'
+  }];
+
+  $scope.packages = testPackages;
 
   $scope.onezoneDatepicker = {
       date: new Date(),
@@ -480,7 +550,8 @@ angular.module('starter.controllers', [])
       // hideSetButton: false,
       // highlights: highlights,
       callback: function(value){
-          // your code
+          // TODO: DenizDem - Retrieve the new packages.
+          $scope.packages = self.testPackages;
       }
   };
 

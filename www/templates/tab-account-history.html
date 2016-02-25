@@ -10,6 +10,14 @@
         </onezone-datepicker>
       </ion-item>
 
+      <ion-item>
+        Toplam Paket: {{packages.length}}
+      </ion-item>
+
+      <ion-item ng-repeat="package in packages">
+        {{package.Client.Name}} - {{package.Total}}
+      </ion-item>
+
     </ion-list>
   </ion-content>
 </ion-view>
