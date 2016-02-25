@@ -1,0 +1,29 @@
+<ion-view view-title="Kullanıcı Hesabı">
+  <ion-content ng-model="courier">
+    <ion-list>
+
+      <ion-item class="item-icon-left">
+        <i class="icon ion-ios-person"></i>
+        {{courier.Name}}
+      </ion-item>
+
+      <ion-item class="item-icon-left item-icon-right" ng-href="#/tab/account/history">
+        <i class="icon ion-ios-paper"></i>
+        Geçmiş Siparişler
+        <i class="icon ion-ios-more"></i>
+      </ion-item>
+
+
+      <ion-item>
+        <button class="button button-block button-assertive" ng-click="logoutUser()">
+            Çıkış Yap
+        </button>
+      </ion-item>
+
+<!--       <ion-toggle  ng-model="settings.enableFriends">
+        Enable Friends
+      </ion-toggle>
+ -->
+    </ion-list>
+  </ion-content>
+</ion-view>

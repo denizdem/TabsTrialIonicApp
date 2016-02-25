@@ -401,27 +401,6 @@ angular.module('starter.controllers', [])
         template: 'Hata: ' + status
       });
     });
-
-    // $ionicLoading.show(templateOfLoading);
-
-    // OrderService.updateOrderStateToCourierLeftClient().then(function(order) {
-    //   // resolve
-
-    //   $ionicHistory.clearHistory();
-    //   $ionicHistory.nextViewOptions({ disableBack: true });
-
-    //   $ionicLoading.hide();
-
-    //   checkCourierOrderStateAndNavigate($state, order);
-    // }, function(status) {
-    //   // reject
-
-    //   var alertPopup = $ionicPopup.alert({
-    //     title: 'Bir hata oluştu.',
-    //     template: 'Hata: ' + status
-    //   });
-
-    // });
   }
 })
 
@@ -447,6 +426,71 @@ angular.module('starter.controllers', [])
 
   $scope.isPaymentMethodSelected = function(paymentMethodId) {
     return $scope.order.PaymentMethod.Id == paymentMethodId;
+  }
+})
+
+.controller('AccountCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, CourierService, LoginService) {
+
+  $scope.$on('$ionicView.enter', function(e) {
+    $scope.courier = CourierService.getCurrentCourier();
+  });
+
+  $scope.logoutUser = function() {
+    LoginService.logoutUser();
+
+    $ionicHistory.clearHistory();
+    $ionicHistory.nextViewOptions({ disableBack: true });
+
+    $state.go('account.login');
+  }
+})
+
+.controller('AccountHistoryCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, CourierService, LoginService) {
+
+  $scope.$on('$ionicView.enter', function(e) {
+    $scope.courier = CourierService.getCurrentCourier();
+  });
+
+  // TODO: DenizDem - Retrieve these from web api
+  var testPackages = [
+    { Id :1,
+      
+    },
+
+    {
+    }
+  ];
+
+  $scope.onezoneDatepicker = {
+      date: new Date(),
+      mondayFirst: true,
+      // months: months,                    
+      // daysOfTheWeek: daysOfTheWeek,     
+      // startDate: startDate,             
+      // endDate: endDate,                    
+      // disablePastDays: false,
+      // disableSwipe: false,
+      // disableWeekend: false,
+      // disableDates: disableDates,
+      // disableDaysOfWeek: disableDaysOfWeek,
+      // showDatepicker: false,
+      // showTodayButton: true,
+      // calendarMode: false,
+      // hideCancelButton: false,
+      // hideSetButton: false,
+      // highlights: highlights,
+      callback: function(value){
+          // your code
+      }
+  };
+
+  $scope.logoutUser = function() {
+    LoginService.logoutUser();
+
+    $ionicHistory.clearHistory();
+    $ionicHistory.nextViewOptions({ disableBack: true });
+
+    $state.go('account.login');
   }
 })
 

@@ -175,7 +175,8 @@ angular.module('starter.services', [])
 
       /////////////////////////////////////////////////
       logoutUser: function() {
-        this.deleteCredentials();
+        // Don't delete credentials, so we can auto-fill it next time again
+        // this.deleteCredentials();
         this.deleteAuthToken();
 
         HttpHeaderService.removeDefaultAuthHeader();
@@ -206,16 +207,26 @@ angular.module('starter.services', [])
 
 .factory('CourierService', function($q, $http, ConstantsService) {
 
+  var self = this;
+  var currentCourier = null;
+
   return {
+
+    /////////////////////////////////////////////////
+    getCurrentCourier: function() {
+      return self.currentCourier;
+    },
 
     /////////////////////////////////////////////////
     getCourier: function() {
       return $q(function(resolve, reject) {
         $http.get(ConstantsService.webApiCourier()).success(function(data, status, headers, config) {
           console.log(data);
+          self.currentCourier = data;
           resolve(data);
         }).error(function(data, status, headers, config) {
           console.log(data);
+          self.currentCourier = null;
           reject();
         });
       });

@@ -1,0 +1,15 @@
+<ion-view view-title="Geçmiş Siparişler">
+  <ion-content ng-model="courier">
+    <ion-list>
+
+      <ion-item>
+        <onezone-datepicker datepicker-object="onezoneDatepicker">
+          <button class="button button-block button-outline button-positive show-onezone-datepicker">
+            {{onezoneDatepicker.date | date:'dd MMMM yyyy'}} 
+          </button>
+        </onezone-datepicker>
+      </ion-item>
+
+    </ion-list>
+  </ion-content>
+</ion-view>
