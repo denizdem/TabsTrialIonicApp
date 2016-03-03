@@ -1,19 +1,34 @@
-<ion-view view-title="Teslimatta" name="order-courierWithClient-view" >
+<ion-view view-title="Paket Teslimi" name="order-courierLeftClient-view" >
 
   <ion-content class="" ng-model="order">
     <br/>
-    <h3 class="title text-center">Lütfen paketi teslim ediniz.</h3>
+    <h3 class="title text-center">Lütfen teslim etmek istediğiniz paketi seçiniz.</h3>
 
-    <div ng-include src="'templates/OrderDeliveryDetailsListCardTemplate.html'"></div>
-    <div ng-include src="'templates/OrderClientDetailsListCardTemplate.html'"></div>
-    <div ng-include src="'templates/OrderOpDetailsListCardTemplate.html'"></div>
+      <ion-item>
+        <i class="icon icon-left ion-ios-box"></i>
+        Teslim Edilecek Paket Sayısı: {{packages.length}}
+      </ion-item>
 
-    <div class="list list-inset">
-        <button class="button button-block button-balanced" ng-click="choosePaymentDetails()">
-          <i class="icon icon-left ion-cash"></i>
-          Ödeme Bilgilerini Gir
-        </button>
-    </div>
+      <ion-item ng-repeat="package in packages" ng-style="{padding:0}" ng-click="packageClicked({{package}})">
+        <div class="list card" style="padding:0">
+
+          <ion-item class="item item-divider item-icon-right item-energized">
+            <i class="icon ion-chevron-right"></i>
+            <span style="display:inline-block, font-weight:bold">Tutar: {{package.ProposedTotal}} TRY - {{package.ProposedPaymentMethod.Name}}</span>
+          </ion-item>
+
+          <ion-item class="item" ng-style="{'padding':'3'}">
+
+              <span class="input-label positive text-bold" style="padding:0">Adres</span>
+              <span class="item-text-wrap" style="padding:0">{{package.DeliveryAddress}}</span>
+              <hr>
+              <span class="input-label positive text-bold" style="padding:0">Not</span>
+              <span class="item-text-wrap" style="padding:0">{{package.ClientNotes}}</span>
+
+          </ion-item> <!-- Item Content -->
+
+         </div> <!-- List Item -->
+      </ion-item>
 
   </ion-content>
 </ion-view>

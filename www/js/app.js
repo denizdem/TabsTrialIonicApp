@@ -81,12 +81,42 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     }
   })
 
+  .state('tab.order.chooseOrderPackages', {
+    url: '/chooseOrderPackages/:keepPackages',
+    views: {
+      'tab-order-master': {
+      templateUrl: 'templates/tab-order-chooseOrderPackages.html',
+      controller: 'OrderChooseOrderPackagesCtrl'
+      }
+    }
+  })
+
+  .state('tab.order.verifyChosenOrderPackages', {
+    url: '/verifyChoosenOrderPackages/:chosenPackagesJson',
+    views: {
+      'tab-order-master': {
+      templateUrl: 'templates/tab-order-verifyChoosenOrderPackages.html',
+      controller: 'OrderVerifyChosenOrderPackagesCtrl'
+      }
+    }
+  })
+
   .state('tab.order.courierLeftClient', {
     url: '/courierLeftClient',
     views: {
       'tab-order-master': {
       templateUrl: 'templates/tab-order-courierLeftClient.html',
       controller: 'OrderCourierLeftClientCtrl'
+      }
+    }
+  })
+
+  .state('tab.order.deliverPackage', {
+    url: '/deliverPackage/:packageJson',
+    views: {
+      'tab-order-master': {
+      templateUrl: 'templates/tab-order-deliverPackage.html',
+      controller: 'OrderDeliverPackageCtrl'
       }
     }
   })

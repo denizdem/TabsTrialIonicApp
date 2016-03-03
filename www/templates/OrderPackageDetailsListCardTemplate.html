@@ -1,0 +1,22 @@
+    <div class="list card" style="padding:0">
+
+      <ion-item class="item item-divider" ng-click="packageHeaderClicked({{package}})" ng-class="isPackageSelected({{package}}) ? 'item-balanced' : 'item-assertive'" ng-style="{'line-height': '30px'}">
+        <div class="item-icon-right">
+          <i class="icon ion-ios-checkmark-outline" ng-show="isPackageSelected({{package}})"></i>
+          <i class="icon ion-ios-minus-outline" ng-show="!isPackageSelected({{package}})"></i>
+        </div>
+        <span style="display:inline-block, font-weight:bold">Tutar: {{package.ProposedTotal}} TRY - {{package.ProposedPaymentMethod.Name}}</span>
+      </ion-item>
+
+      <ion-item class="item" ng-style="{'padding':'3'}">
+
+          <span class="input-label positive text-bold" style="padding:0">Adres</span>
+          <span class="item-text-wrap" style="padding:0">{{package.DeliveryAddress}}</span>
+          <hr>
+          <span class="input-label positive text-bold" style="padding:0">Not</span>
+          <span class="item-text-wrap" style="padding:0">{{package.ClientNotes}}</span>
+
+      </ion-item> <!-- Item Content -->
+
+     </div> <!-- List Item -->
+

@@ -1,0 +1,19 @@
+<ion-view view-title="Teslimatta" name="order-courierWithClient-view" >
+
+  <ion-content class="" ng-model="order">
+    <br/>
+    <h3 class="title text-center">Lütfen paketi teslim ediniz.</h3>
+
+    <div ng-include src="'templates/OrderDeliveryDetailsListCardTemplate.html'"></div>
+    <div ng-include src="'templates/OrderClientDetailsListCardTemplate.html'"></div>
+    <div ng-include src="'templates/OrderOpDetailsListCardTemplate.html'"></div>
+
+    <div class="list list-inset">
+        <button class="button button-block button-balanced" ng-click="choosePaymentDetails()">
+          <i class="icon icon-left ion-cash"></i>
+          Ödeme Bilgilerini Gir
+        </button>
+    </div>
+
+  </ion-content>
+</ion-view>

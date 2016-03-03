@@ -1,0 +1,41 @@
+<ion-view view-title="Lütfen Paketleri Seçiniz">
+  <ion-content ng-model="order" has-header="true" has-tabs="true">
+    <ion-list>
+
+      <ion-item class="legend" ng-style="{padding:0}">
+        <button class="button button-block button-stable" ng-click="refreshCurrentPackages()">
+          <i class="icon icon-left ion-refresh"></i>
+          Yenile
+        </button>
+      </ion-item>
+
+      <ion-item ng-repeat="package in packages" ng-style="{padding:0}">
+        <div ng-include src="'templates/OrderPackageDetailsListCardTemplate.html'"></div>
+      </ion-item>
+
+      <div class="list list-inset">
+
+        <label ng-class="currentPackages.length <=0 ? 'assertive' : 'balanced'">
+          <i class="icon icon-left ion-ios-box"></i>
+          Seçili Paket Sayısı: {{currentPackages.length}}
+        </label>
+
+
+        <button class="button button-block" ng-class="currentPackages.length <= 0 ? 'button-assertive' : 'button-balanced'" ng-disabled="currentPackages.length <= 0" ng-click="advanceToVerifyPackages()">
+
+          <div class="item-icon-right" ng-show="currentPackages.length <= 0">
+            <i class="icon ion-ios-minus-outline"></i>
+            Paket Seçiniz
+          </div>
+
+
+          <div class="item-icon-right" ng-show="currentPackages.length > 0">
+            <i class="icon ion-chevron-right"></i>
+            Paketleri Doğrula
+          </div>
+        </button>
+      </div>
+
+    </ion-list>
+  </ion-content>
+</ion-view>

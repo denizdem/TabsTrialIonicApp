@@ -368,4 +368,22 @@ angular.module('starter.services', [])
   }
 })
 
+.factory('PackageService', function($q, $http, ConstantsService) {
+
+  var self = this;
+
+  return {
+
+    /////////////////////////////////////////////////
+    getAllPackages: function(packages) { // TODO: DenizDem - Remove the parameter
+      return $q(function(resolve, reject) {
+        // TODO: DenizDem - Do the real call to get the packages
+        setTimeout(function() {
+          resolve(packages);
+        }, 500);
+      });
+    }
+  }
+})
+
 ;

@@ -1,5 +1,82 @@
 var templateOfLoading = {template: '<ion-spinner></ion-spinner><br/>Yükleniyor...'};
 
+  // TODO: DenizDem - Retrieve these from web api
+
+  var testOperator = {
+    Id: 3,
+    Name: 'DevranTest',
+    Surname: 'KaramanTest',
+    Phone: '(123)4567890',
+    Phone2: '(321)4567890',
+    FullName: 'DevranTest KaramanTest'
+  };
+
+  var testOperator2 = {
+    Id: 5,
+    Name: 'OpTest',
+    Surname: 'OpSurTest',
+    Phone: '(123)0987654',
+    Phone2: '(321)0987654',
+    FullName: 'OpTest OpSurTest'
+  };
+
+  var testClient = {
+    Id: 101,
+    Name: 'Demo1',
+    FullName: 'Demo1 A.S.',
+    Phone: '(890)1234567',
+    Phone2: '(890)7654321',
+    Phone3: '(098)1234567',
+    Address: 'Demo Address',
+    AddressDescription: 'Adres tarifi for Demo1 restaurant',
+    ContactName: 'Ali',
+    ContactPhone: '(345)1267890'
+  };
+
+  var testClient = {
+    Id: 102,
+    Name: 'Demo2',
+    FullName: 'Demo2 A.S.',
+    Phone: '(890)1234567',
+    Phone2: '(890)7654321',
+    Phone3: '(098)1234567',
+    Address: 'Demo Address2',
+    AddressDescription: 'Adres tarifi for Demo2 restaurant',
+    ContactName: 'Veli',
+    ContactPhone: '(543)1267890'
+  };
+
+  var testPackages = [{
+    Id: 1,
+    EntryDate: new Date(),
+    ClientArrivalDate: new Date(),
+    ClientDepartureDate: new Date(),
+    ProposedTotal: 15.15,
+    Total: 16.16,
+    ProposedPaymentMethod: { Id: 1, Name: 'Nakit'},
+    PaymentMethod: { Id: 2, Name: 'Kredi Karti'},
+    DeliveryAddress: 'Flan filan adresi. Sekizinci kat.',
+    ClientNotes: 'Notes client has entered for the order.',
+    Operator: testOperator,
+    Client: testClient,
+    EndUserPhone: '(098)7654321'
+  },{
+    Id: 2,
+    EntryDate: new Date(),
+    ClientArrivalDate: new Date(),
+    ClientDepartureDate: new Date(),
+    ProposedTotal: 23.23,
+    Total: 22.22,
+    ProposedPaymentMethod: { Id: 2, Name: 'Kredi Karti'},
+    PaymentMethod: { Id: 1, Name: 'Nakit'},
+    DeliveryAddress: 'Adres 2.',
+    ClientNotes: 'Notes2 client has entered for the order.',
+    Operator: testOperator2,
+    Client: testClient,
+    EndUserPhone: '(098)7654321'
+  }];
+
+
 // IMPORTANT: Until we figure out a better way to do this, keep this enum in sync
 // with the enums on the server.
 var OrderStatusEnum = {
@@ -265,28 +342,30 @@ angular.module('starter.controllers', [])
 
   $scope.choosePackages = function() {
 
-    $ionicLoading.show(templateOfLoading);
+    $state.go('tab.order.chooseOrderPackages');
+
+    // $ionicLoading.show(templateOfLoading);
 
     // TODO: DenizDem - We would go to the package selection screen here, which we don't
     // have at the moment. For now, go ahead and switch to state to courierLeftClient
-    OrderService.updateOrderStateToCourierLeftClient().then(function(order) {
-      // resolve
+    // OrderService.updateOrderStateToCourierLeftClient().then(function(order) {
+    //   // resolve
 
-      $ionicHistory.clearHistory();
-      $ionicHistory.nextViewOptions({ disableBack: true });
+    //   $ionicHistory.clearHistory();
+    //   $ionicHistory.nextViewOptions({ disableBack: true });
 
-      $ionicLoading.hide();
+    //   $ionicLoading.hide();
 
-      checkCourierOrderStateAndNavigate($state, order);
-    }, function(status) {
-      // reject
+    //   checkCourierOrderStateAndNavigate($state, order);
+    // }, function(status) {
+    //   // reject
 
-      var alertPopup = $ionicPopup.alert({
-        title: 'Bir hata oluştu.',
-        template: 'Hata: ' + status
-      });
+    //   var alertPopup = $ionicPopup.alert({
+    //     title: 'Bir hata oluştu.',
+    //     template: 'Hata: ' + status
+    //   });
 
-    });
+    // });
   },
 
   $scope.toggleOpDetailsExpanded = function() {
@@ -299,8 +378,164 @@ angular.module('starter.controllers', [])
 
 })
 
-.controller('OrderCourierLeftClientCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, OrderService) {
+.controller('OrderChooseOrderPackagesCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, $stateParams, OrderService, PackageService) {
 
+  $scope.currentPackages = [];
+
+  $scope.$on('$ionicView.enter', function(e) {
+    $scope.order = OrderService.getCurrentOrder();
+
+    // Go ahead and retrieve all of the open packages of this client
+    // Check if the current order still has the same orderId as the stored packages. If not,
+    // they are probably stale, so re-check them.
+    var shouldRetrievePackages = true;
+    if ($scope.currentPackages.length == 0)
+      shouldRetrievePackages = true;
+    else if ($stateParams.keepPackages)
+      shouldRetrievePackages = false;
+
+    if (shouldRetrievePackages) {
+      $scope.refreshCurrentPackages();
+    }
+  });
+
+  $scope.getIndexOfSelectedPackage = function(package) {
+
+    for (var i = 0; i < $scope.currentPackages.length; ++i) {
+      if ($scope.currentPackages[i].Id == package.Id)
+        return i;
+    }
+
+    return -1;
+  },
+
+  $scope.isPackageSelected = function(package) {
+    return ($scope.getIndexOfSelectedPackage(package) != -1)
+  },
+
+  $scope.packageHeaderClicked = function(package) {
+    $scope.togglePackageSelectedState(package);
+  },
+
+  $scope.togglePackageSelectedState = function(package) {
+    var index = $scope.getIndexOfSelectedPackage(package);
+    if (index != -1)
+      $scope.currentPackages.splice(index, 1)
+    else
+      $scope.currentPackages.push(package);
+
+    assert($scope.currentPackages.length >= 0, 'Number of selected packages cannot drop below 0');
+  },
+
+  $scope.refreshCurrentPackages = function() {
+
+    // Reset vars
+    $scope.currentPackages = [];
+    if ($scope.packages) {
+      for (var i = 0, len = $scope.packages.length; i < len; ++i) {
+        $scope.packages[i].isLocallySelected = false;
+      }
+    }
+
+    $ionicLoading.show(templateOfLoading);
+
+    // TODO: DenizDem - Remove the paramter
+    PackageService.getAllPackages(testPackages).then(function(packages) {
+      // Store the list of current pacakges
+      $scope.packages = packages;
+      $ionicLoading.hide();
+    }, function(status) {
+      // reject
+
+      $ionicLoading.hide();
+
+      var alertPopup = $ionicPopup.alert({
+        title: 'Bir hata oluştu.',
+        template: 'Hata: ' + status
+      });
+    });
+  },
+
+  $scope.advanceToVerifyPackages = function() {
+
+    assert($scope.currentPackages.length > 0, 'We should have chosen at least one package before allowing the click.');
+
+    var chosenPackagesString = JSON.stringify($scope.currentPackages);
+    $state.go('tab.order.verifyChosenOrderPackages', { chosenPackagesJson: chosenPackagesString});
+
+  }
+
+})
+
+.controller('OrderVerifyChosenOrderPackagesCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, $stateParams, OrderService, PackageService) {
+
+  $scope.packages = JSON.parse($stateParams.chosenPackagesJson || null);
+  assert($scope.packages.length > 0, 'We should have chosen at least some packages.');
+
+  $scope.isPackageSelected = function(package) {
+    return true;
+  },
+
+  $scope.chosePackagesAgain = function() {
+    $state.go('tab.order.chooseOrderPackages', {keepPackages: true});
+  },
+
+  $scope.advanceToOutForDelivery = function() {
+
+    $ionicLoading.show(templateOfLoading);
+
+    // TODO: DenizDem - Go ahead and update the order with the chosen packages $scope.packages
+    // !!!!!!!!!!
+
+    // TODO: DenizDem - We would go to the package selection verification screen here, which we don't
+    // have at the moment. For now, go ahead and switch to state to courierLeftClient
+    OrderService.updateOrderStateToCourierLeftClient().then(function(order) {
+      // resolve
+
+      $ionicHistory.clearHistory();
+      $ionicHistory.nextViewOptions({ disableBack: true });
+
+      $ionicLoading.hide();
+
+      $state.go('tab.order.courierLeftClient');
+    }, function(status) {
+      // reject
+
+      var alertPopup = $ionicPopup.alert({
+        title: 'Bir hata oluştu.',
+        template: 'Hata: ' + status
+      });
+
+    });
+
+  }
+
+})
+
+.controller('OrderCourierLeftClientCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, $stateParams, OrderService, PackageService) {
+
+  $scope.$on('$ionicView.enter', function(e) {
+    $scope.order = OrderService.getCurrentOrder();
+
+    // TODO: DenizDem - Fix this and retrieve the testPackages from the actual order after refresh. they should be the outForDelivery packages.
+    $scope.packages = testPackages;
+  });
+
+  $scope.packageClicked = function(package) {
+
+    var packageString = JSON.stringify(package);
+    $state.go('tab.order.deliverPackage', { packageJson: packageString});
+
+  }
+
+})
+
+.controller('OrderDeliverPackageCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, $stateParams, OrderService) {
+
+  $scope.package = JSON.parse($stateParams.packageJson || null);
+
+  // TODO: DenizDem - !!!!!!!!!! Go ahead and display the package in the template, which requires
+  // us to have the right object structure at the moment (package has delivery address, not order, in OrderDeliverydetailsListCardTemplate.html
   $scope.$on('$ionicView.enter', function(e) {
     $scope.order = OrderService.getCurrentOrder();
   });
@@ -452,82 +687,6 @@ angular.module('starter.controllers', [])
   });
 
   var self = this;
-
-  // TODO: DenizDem - Retrieve these from web api
-
-  var testOperator = {
-    Id: 3,
-    Name: 'DevranTest',
-    Surname: 'KaramanTest',
-    Phone: '(123)4567890',
-    Phone2: '(321)4567890',
-    FullName: 'DevranTest KaramanTest'
-  };
-
-  var testOperator2 = {
-    Id: 5,
-    Name: 'OpTest',
-    Surname: 'OpSurTest',
-    Phone: '(123)0987654',
-    Phone2: '(321)0987654',
-    FullName: 'OpTest OpSurTest'
-  };
-
-  var testClient = {
-    Id: 101,
-    Name: 'Demo1',
-    FullName: 'Demo1 A.S.',
-    Phone: '(890)1234567',
-    Phone2: '(890)7654321',
-    Phone3: '(098)1234567',
-    Address: 'Demo Address',
-    AddressDescription: 'Adres tarifi for Demo1 restaurant',
-    ContactName: 'Ali',
-    ContactPhone: '(345)1267890'
-  };
-
-  var testClient = {
-    Id: 102,
-    Name: 'Demo2',
-    FullName: 'Demo2 A.S.',
-    Phone: '(890)1234567',
-    Phone2: '(890)7654321',
-    Phone3: '(098)1234567',
-    Address: 'Demo Address2',
-    AddressDescription: 'Adres tarifi for Demo2 restaurant',
-    ContactName: 'Veli',
-    ContactPhone: '(543)1267890'
-  };
-
-  var testPackages = [{
-    Id: 1,
-    EntryDate: new Date(),
-    ClientArrivalDate: new Date(),
-    ClientDepartureDate: new Date(),
-    ProposedTotal: 15.00,
-    Total: 16.00,
-    ProposedPaymentMethod: { Id: 1, Name: 'Nakit'},
-    PaymentMethod: { Id: 2, Name: 'Kredi Karti'},
-    DeliveryAddress: 'Flan filan adresi. Sekizinci kat.',
-    ClientNotes: 'Notes client has entered for the order.',
-    Operator: testOperator,
-    Client: testClient,
-    EndUserPhone: '(098)7654321'
-  },{
-    Id: 2,
-    EntryDate: new Date(),
-    ClientArrivalDate: new Date(),
-    ClientDepartureDate: new Date(),
-    ProposedTotal: 23.00,
-    Total: 22.00,
-    ProposedPaymentMethod: { Id: 2, Name: 'Kredi Karti'},
-    PaymentMethod: { Id: 1, Name: 'Nakit'},
-    DeliveryAddress: 'Adres 2.',
-    ClientNotes: 'Notes2 client has entered for the order.',
-    Operator: testOperator2,
-    Client: testClient,
-    EndUserPhone: '(098)7654321'
-  }];
 
   $scope.packages = testPackages;
 
