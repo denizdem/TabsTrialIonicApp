@@ -6,24 +6,24 @@
 
       <ion-item class="item" ng-show="isDeliveryDetailsExpanded">
           <span class="input-label positive text-bold">Adres</span>
-          <span class="item-text-wrap">{{order.DeliveryAddress}}</span>
+          <span class="item-text-wrap">{{package.DeliveryAddress}}</span>
           <hr>
           <span class="input-label positive text-bold">Notlar</span>
-          <span class="item-text-wrap">{{order.ClientNotes}}</span>
+          <span class="item-text-wrap">{{package.ClientNotes}}</span>
           <hr>
           <span class="input-label positive" style="display:inline-block">
             Tutar:
           </span>
-          <span style="display:inline-block">{{order.ProposedTotal}}</span>
+          <span style="display:inline-block">{{package.ProposedTotal}}</span>
           <hr>
           <span class="input-label positive" style="display:inline-block">
             Ödeme Tipi:
           </span>
-          <span style="display:inline-block">{{order.ProposedPaymentMethod.Name}}</span>
+          <span style="display:inline-block">{{package.ProposedPaymentMethod.Name}}</span>
           <hr>
 
         <div class="list list-inset">
-          <a class="button button-block button-energized" ng-href="tel: 0{{order.EndUserPhone}}">
+          <a class="button button-block button-energized" ng-href="tel: 0{{package.EndUserPhone}}">
             <i class="icon icon-left ion-ios-telephone-outline"></i>
             Müşteriyi Ara
           </a>

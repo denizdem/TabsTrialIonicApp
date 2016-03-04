@@ -89,6 +89,15 @@ var OrderStatusEnum = {
   Delivered: 6,
 };
 
+var PackageStatusEnum = {
+  NotAssigned: 1,
+  Assigned: 2,
+  OutForDelivery: 3,
+  Delivered: 4,
+  CancelRequested: 5,
+  Canceled: 6,
+};
+
 function assert(condition, message) {
     if (!condition) {
         message = message || "Assertion failed";
@@ -98,69 +107,50 @@ function assert(condition, message) {
         throw message; // Fallback
     }
 }
-function checkCourierOrderStateAndNavigate($state, order) {
-  if (order == null)
+function checkCourierOrderStateAndNavigate($state, $rootScope, shouldReload) {
+  assert($rootScope.courier != null, 'We should have set a courier before asking for its state');
+  if ($rootScope.courier.Order == null)
   {
     $state.go('tab.order.notAssigned');
   }
   else
   {
-    switch(order.Status)
+    switch($rootScope.courier.Order.Status)
     {
       case OrderStatusEnum.Received:
       case OrderStatusEnum.CancelRequested:
       case OrderStatusEnum.Canceled:
       case OrderStatusEnum.Delivered:
-        assert(false, 'Unexpected order status: ' + order.Status);
+        assert(false, 'Unexpected order status: ' + $rootScope.courier.Order.Status);
         break;
 
       case OrderStatusEnum.CourierAssigned:
-        $state.go('tab.order.courierAssigned');
+        $state.go('tab.order.courierAssigned', {}, {reload: shouldReload});
         break;
 
       case OrderStatusEnum.CourierWithClient:
-        $state.go('tab.order.courierWithClient');
+        $state.go('tab.order.courierWithClient', {}, {reload: shouldReload});
         break;
 
       case OrderStatusEnum.CourierLeftClient:
-        $state.go('tab.order.courierLeftClient');
+        $state.go('tab.order.courierLeftClient', {}, {reload: shouldReload});
         break;
 
       default:
-        assert(false, 'Unknown order status: ' + order.Status);
+        assert(false, 'Unknown order status: ' + $rootScope.courier.Order.Status);
         break;
     }
   }
 }
 
+function checkIfCanDeliverPackage(package) {
+  // Allow only packages with status Assigned or OutForDelivery to be shown
+  return ((package.Status == PackageStatusEnum.Assigned) || (package.Status == PackageStatusEnum.OutForDelivery));
+}
+
 angular.module('starter.controllers', [])
 
-// .controller('ChatsCtrl', function($scope, Chats) {
-//   // With the new view caching in Ionic, Controllers are only called
-//   // when they are recreated or on app start, instead of every page change.
-//   // To listen for when this page is active (for example, to refresh data),
-//   // listen for the $ionicView.enter event:
-//   //
-//   //$scope.$on('$ionicView.enter', function(e) {
-//   //});
-
-//   $scope.chats = Chats.all();
-//   $scope.remove = function(chat) {
-//     Chats.remove(chat);
-//   };
-// })
-
-// .controller('ChatDetailCtrl', function($scope, $stateParams, Chats) {
-//   $scope.chat = Chats.get($stateParams.chatId);
-// })
-
-// .controller('AccountCtrl', function($scope) {
-//   $scope.settings = {
-//     enableFriends: true
-//   };
-// })
-
-.controller('WelcomeCtrl', function($scope, $ionicLoading, $ionicHistory, $state, $http, $localstorage, LoginService, CourierService, OrderService, HttpHeaderService) {
+.controller('WelcomeCtrl', function($rootScope, $scope, $ionicLoading, $ionicHistory, $state, $http, $localstorage, LoginService, CourierService, OrderService, HttpHeaderService) {
   $scope.$on('$ionicView.enter', function(e) {
     
     $ionicHistory.clearHistory();
@@ -168,6 +158,8 @@ angular.module('starter.controllers', [])
       disableBack: true
     });
 
+    // Clear the current courier from the root scope
+    $rootScope.courier = null;
     $ionicLoading.show(templateOfLoading);
 
     var credentials = LoginService.loadCredentials();
@@ -178,56 +170,38 @@ angular.module('starter.controllers', [])
       // First, set the default auth headers
       HttpHeaderService.addDefaultAuthHeader(authToken);
 
-      CourierService.getCourier().then(function(courier) {
+      CourierService.getCourier($rootScope).then(function(courier) {
         // resolve
 
         console.log('kurye alma basarili');
+        $ionicHistory.clearHistory();
+        $ionicHistory.nextViewOptions({disableBack: true});
 
-        // We have a courier. Check the order.
-        if (courier.CurrentOrderId != null)
-        {
-          // Go ahead and check the order
-          OrderService.getOrder().then(function(order) {
-            // resolve
+        $ionicLoading.hide();
 
-            $ionicLoading.hide();
-
-            checkCourierOrderStateAndNavigate($state, order);
-          }, function() {
-            // reject
-
-            // Do nothing
-            $ionicLoading.hide();
-          });
-        }
-        else
-        {
-          // There are no orders assigned to this courier.
-          $ionicLoading.hide();
-          $state.go('tab.order.notAssigned');
-        }
+        checkCourierOrderStateAndNavigate($state, $rootScope, false);
       }, function() {
         // reject
 
         // getCourier has failed. Maybe auth token has expired. Request user to login again.
         console.log('kurye alma bararisiz');
-        $ionicLoading.hide();
-        $state.go('account.login');
+        $ionicHistory.clearHistory();
+        $ionicHistory.nextViewOptions({disableBack: true});
 
-        // LoginService.loginUser(credentials.UserName, credentials.Password).success(function(data) {
-        //   // login also has failed
-        //   $ionicLoading.hide();
-        // }).error(function(data) {
-        //   $ionicLoading.hide();
-        //   $state.go('account.login');
-        // });
+        $ionicLoading.hide();
+
+        $state.go('account.login');
       });
     }
     else
     {
-      LoginService.logoutUser();
+      CourierService.logoutCourier($rootScope);
+
+      $ionicHistory.clearHistory();
+      $ionicHistory.nextViewOptions({disableBack: true});
 
       $ionicLoading.hide();
+
       $state.go('account.login');
     }
   });
@@ -244,15 +218,17 @@ angular.module('starter.controllers', [])
   $scope.login = function() {
 
     $ionicHistory.clearHistory();
-    $ionicHistory.nextViewOptions({
-      disableBack: true
-    });
+    $ionicHistory.nextViewOptions({disableBack: true});
 
     $ionicLoading.show(templateOfLoading);
 
     LoginService.loginUser($scope.data.userName, $scope.data.password).success(function(data) {
         // We have retrieved the user successfully. Go to the welcome page, and then redirect appropriately
+        $ionicHistory.clearHistory();
+        $ionicHistory.nextViewOptions({disableBack: true});
+
         $ionicLoading.hide();
+
         $state.go('account.welcome');
     }).error(function(data) {
       $ionicLoading.hide();
@@ -264,35 +240,39 @@ angular.module('starter.controllers', [])
   }
 })
 
-.controller('OrderNotAssignedCtrl', function($scope, $ionicPopup, $ionicHistory, $ionicLoading, $state, OrderService) {
+.controller('OrderNotAssignedCtrl', function($rootScope, $scope, $ionicPopup, $ionicHistory, $ionicLoading, $state, CourierService) {
 
   $scope.refresh = function() {
 
     $ionicLoading.show(templateOfLoading);
 
-    OrderService.getOrder().then(function(order) {
+    CourierService.getCourier($rootScope).then(function(courier) {
       // resolve
 
+      console.log('kurye alma basarili');
       $ionicHistory.clearHistory();
-      $ionicHistory.nextViewOptions({ disableBack: true });
+      $ionicHistory.nextViewOptions({disableBack: true});
 
       $ionicLoading.hide();
 
-      checkCourierOrderStateAndNavigate($state, order);
+      checkCourierOrderStateAndNavigate($state, $rootScope, false);
     }, function() {
       // reject
 
-      // Do nothing
+      // getCourier has failed. Maybe auth token has expired. Request user to login again.
+      console.log('kurye alma bararisiz');
+      $ionicHistory.clearHistory();
+      $ionicHistory.nextViewOptions({disableBack: true});
+
       $ionicLoading.hide();
+
+      $state.go('account.login');
     });
+
   }
 })
 
-.controller('OrderCourierAssignedCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, OrderService) {
-
-  $scope.$on('$ionicView.enter', function(e) {
-    $scope.order = OrderService.getCurrentOrder();
-  });
+.controller('OrderCourierAssignedCtrl', function($rootScope, $scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, OrderService) {
 
   $scope.isClientDetailsExpanded = true;
   $scope.isOpDetailsExpanded = false;
@@ -301,7 +281,7 @@ angular.module('starter.controllers', [])
 
     $ionicLoading.show(templateOfLoading);
 
-    OrderService.updateOrderStateToCourierWithClient().then(function(order) {
+    OrderService.updateOrderStateToCourierWithClient($rootScope).then(function(order) {
       // resolve
 
       $ionicHistory.clearHistory();
@@ -309,9 +289,11 @@ angular.module('starter.controllers', [])
 
       $ionicLoading.hide();
 
-      checkCourierOrderStateAndNavigate($state, order);
+      checkCourierOrderStateAndNavigate($state, $rootScope, false);
     }, function(status) {
       // reject
+
+      $ionicLoading.hide();
 
       var alertPopup = $ionicPopup.alert({
         title: 'Bir hata oluştu.',
@@ -333,39 +315,11 @@ angular.module('starter.controllers', [])
 
 .controller('OrderCourierWithClientCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, OrderService) {
 
-  $scope.$on('$ionicView.enter', function(e) {
-    $scope.order = OrderService.getCurrentOrder();
-  });
-
   $scope.isClientDetailsExpanded = true;
   $scope.isOpDetailsExpanded = false;
 
   $scope.choosePackages = function() {
-
     $state.go('tab.order.chooseOrderPackages');
-
-    // $ionicLoading.show(templateOfLoading);
-
-    // TODO: DenizDem - We would go to the package selection screen here, which we don't
-    // have at the moment. For now, go ahead and switch to state to courierLeftClient
-    // OrderService.updateOrderStateToCourierLeftClient().then(function(order) {
-    //   // resolve
-
-    //   $ionicHistory.clearHistory();
-    //   $ionicHistory.nextViewOptions({ disableBack: true });
-
-    //   $ionicLoading.hide();
-
-    //   checkCourierOrderStateAndNavigate($state, order);
-    // }, function(status) {
-    //   // reject
-
-    //   var alertPopup = $ionicPopup.alert({
-    //     title: 'Bir hata oluştu.',
-    //     template: 'Hata: ' + status
-    //   });
-
-    // });
   },
 
   $scope.toggleOpDetailsExpanded = function() {
@@ -383,9 +337,8 @@ angular.module('starter.controllers', [])
   $scope.currentPackages = [];
 
   $scope.$on('$ionicView.enter', function(e) {
-    $scope.order = OrderService.getCurrentOrder();
 
-    // Go ahead and retrieve all of the open packages of this client
+    // Go ahead and retrieve all of the open packages of this client if we need to
     // Check if the current order still has the same orderId as the stored packages. If not,
     // they are probably stale, so re-check them.
     var shouldRetrievePackages = true;
@@ -439,8 +392,7 @@ angular.module('starter.controllers', [])
 
     $ionicLoading.show(templateOfLoading);
 
-    // TODO: DenizDem - Remove the paramter
-    PackageService.getAllPackages(testPackages).then(function(packages) {
+    PackageService.getAllClientPackages().then(function(packages) {
       // Store the list of current pacakges
       $scope.packages = packages;
       $ionicLoading.hide();
@@ -467,7 +419,7 @@ angular.module('starter.controllers', [])
 
 })
 
-.controller('OrderVerifyChosenOrderPackagesCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, $stateParams, OrderService, PackageService) {
+.controller('OrderVerifyChosenOrderPackagesCtrl', function($rootScope, $scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, $stateParams, OrderService, PackageService) {
 
   $scope.packages = JSON.parse($stateParams.chosenPackagesJson || null);
   assert($scope.packages.length > 0, 'We should have chosen at least some packages.');
@@ -485,41 +437,62 @@ angular.module('starter.controllers', [])
     $ionicLoading.show(templateOfLoading);
 
     // TODO: DenizDem - Go ahead and update the order with the chosen packages $scope.packages
-    // !!!!!!!!!!
+    PackageService.assignPackagesToOrder($rootScope, $scope.packages).then(function(packages) {
 
-    // TODO: DenizDem - We would go to the package selection verification screen here, which we don't
-    // have at the moment. For now, go ahead and switch to state to courierLeftClient
-    OrderService.updateOrderStateToCourierLeftClient().then(function(order) {
-      // resolve
+      // TODO: DenizDem - updateOrderStateToCourierLeftClient needs to be called seperately then assignPackagesToOrder
+      // and that is bad. In case of any failure in the second, we are left in a bad state with no way out,
+      // where packages are assigned to an order but courier can't leave the client because he can't
+      // choose packages the next time. Talk to Altinok and fix this.
+      OrderService.updateOrderStateToCourierLeftClient($rootScope).then(function(order) {
+        $ionicHistory.clearHistory();
+        $ionicHistory.nextViewOptions({ disableBack: true });
 
-      $ionicHistory.clearHistory();
-      $ionicHistory.nextViewOptions({ disableBack: true });
+        $ionicLoading.hide();
 
-      $ionicLoading.hide();
+        $state.go('tab.order.courierLeftClient');
+      }, function(status) {
+        $ionicLoading.hide();
 
-      $state.go('tab.order.courierLeftClient');
+        var alertPopup = $ionicPopup.alert({
+          title: 'Kritik hata oluştu!',
+          template: 'Hata: ' + status
+        });
+      });
+
     }, function(status) {
-      // reject
-
       var alertPopup = $ionicPopup.alert({
         title: 'Bir hata oluştu.',
         template: 'Hata: ' + status
       });
-
     });
-
   }
 
 })
 
-.controller('OrderCourierLeftClientCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, $stateParams, OrderService, PackageService) {
+.controller('OrderCourierLeftClientCtrl', function($rootScope, $scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, $stateParams, OrderService, PackageService) {
 
-  $scope.$on('$ionicView.enter', function(e) {
-    $scope.order = OrderService.getCurrentOrder();
+  $scope.countOfDeliverablePackages = function() {
+    var count = 0;
 
-    // TODO: DenizDem - Fix this and retrieve the testPackages from the actual order after refresh. they should be the outForDelivery packages.
-    $scope.packages = testPackages;
-  });
+    for (var i = 0; i < $rootScope.courier.Order.Packages.length; ++i) {
+      var canDeliver = checkIfCanDeliverPackage($rootScope.courier.Order.Packages[i]);
+      if (canDeliver)
+        ++count;
+    }
+
+    return count;
+  },
+
+  $scope.canDeliverPackage = function(packageId) {
+    for (var i = 0; i < $rootScope.courier.Order.Packages.length; ++i) {
+      if ($rootScope.courier.Order.Packages[i].Id == packageId) {
+        var canDeliver = checkIfCanDeliverPackage($rootScope.courier.Order.Packages[i]);
+        return canDeliver;
+      }
+    }
+
+    return false;
+  },
 
   $scope.packageClicked = function(package) {
 
@@ -530,15 +503,9 @@ angular.module('starter.controllers', [])
 
 })
 
-.controller('OrderDeliverPackageCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, $stateParams, OrderService) {
+.controller('OrderDeliverPackageCtrl', function($rootScope, $scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, $stateParams, OrderService) {
 
   $scope.package = JSON.parse($stateParams.packageJson || null);
-
-  // TODO: DenizDem - !!!!!!!!!! Go ahead and display the package in the template, which requires
-  // us to have the right object structure at the moment (package has delivery address, not order, in OrderDeliverydetailsListCardTemplate.html
-  $scope.$on('$ionicView.enter', function(e) {
-    $scope.order = OrderService.getCurrentOrder();
-  });
 
   $scope.isDeliveryDetailsExpanded = true;
   $scope.isClientDetailsExpanded = false;
@@ -549,14 +516,15 @@ angular.module('starter.controllers', [])
     $ionicLoading.show(templateOfLoading);
 
     // Get the latest payment methods
-    var self = this;
     OrderService.refreshPaymentMethodsIfNecessary().then(function(paymentMethods) {
       // resolve
 
       $ionicLoading.hide();
+
       // Go to the payment details page
-      var url = 'tab.order.paymentDetails/' + self.order.ProposedTotal + '/' + self.order.ProposedPaymentMethod.Id;
-      $state.go('tab.order.paymentDetails', { proposedTotal: self.order.ProposedTotal, proposedPaymentMethodId: self.order.ProposedPaymentMethod });
+      var packageString = JSON.stringify($scope.package);
+
+      $state.go('tab.order.paymentDetails', { packageJson: packageString, resetActuals: true, canEditPayment: false });
     }, function(status) {
       // reject
 
@@ -582,41 +550,47 @@ angular.module('starter.controllers', [])
 
 })
 
-.controller('OrderPaymentDetailsCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, OrderService) {
+.controller('OrderPaymentDetailsCtrl', function($rootScope, $scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, $stateParams, PackageService) {
+
 
   $scope.$on('$ionicView.enter', function(e) {
-    $scope.order = OrderService.getCurrentOrder();
+    $scope.package = JSON.parse($stateParams.packageJson || null);
+
+    $scope.canEditPayment = ($stateParams.canEditPayment == "true");
+
+    // Reset payment variables to proposed ones
+    if ($stateParams.resetActuals == 'true')
+    {
+      $scope.package.Total = $scope.package.ProposedTotal;
+      $scope.package.PaymentMethod = $scope.package.ProposedPaymentMethod;
+    }
   });
-
-  $scope.order = OrderService.getCurrentOrder();
-  // Reset payment variables to proposed ones
-  $scope.order.Total = $scope.order.ProposedTotal;
-  $scope.order.PaymentMethod = $scope.order.ProposedPaymentMethod;
-
-  $scope.canEditPayment = false;
 
   $scope.toggleCanEdit = function() {
     $scope.canEditPayment = !$scope.canEditPayment;
 
     if (!$scope.canEditPayment) {
-      $scope.order.Total = $scope.order.ProposedTotal;
-      $scope.order.PaymentMethod = $scope.order.ProposedPaymentMethod;
+      $scope.package.Total = $scope.package.ProposedTotal;
+      $scope.package.PaymentMethod = $scope.package.ProposedPaymentMethod;
     }
   },
 
   $scope.paymentMethodClicked = function() {
     if ($scope.canEditPayment)
-      $state.go('tab.order.paymentMethod');
+    {
+      var packageString = JSON.stringify($scope.package);
+      $state.go('tab.order.paymentMethod', { packageJson: packageString });
+    }
   },
 
   $scope.closePackage = function() {
 
-    // Close the order
-    var self = this;
-
+    // Close the package
     $ionicLoading.show(templateOfLoading);
-    OrderService.updateOrderStateToDelivered().then(function(order) {
+    PackageService.updatePackageStageToDelivered($scope.package).then(function(package) {
       // resolve
+
+      $scope.package = package;
 
       $ionicLoading.hide();
 
@@ -624,8 +598,27 @@ angular.module('starter.controllers', [])
         title: 'Sipariş başarıyla kapatıldı.',
         okText: 'Tamam'
       }).then(function() {
-        // We redirect to welcome page, which would re-read the courier
-        $state.go('account.welcome');
+
+        // Now go ahead and update the original package in the $rootScope
+        var hasOtherPackages = false;
+        for (var i = 0; i < $rootScope.courier.Order.Packages.length; ++i) {
+          if ($rootScope.courier.Order.Packages[i].Id == $scope.package.Id) {
+            $rootScope.courier.Order.Packages[i].Status = $scope.package.Status;
+          } else if (checkIfCanDeliverPackage($rootScope.courier.Order.Packages[i])) {
+            hasOtherPackages = true;
+          }
+        }
+
+        $ionicHistory.clearHistory();
+        $ionicHistory.nextViewOptions({ disableBack: true });
+
+        if (hasOtherPackages) {
+          // Has more packages, go to the proper state
+          checkCourierOrderStateAndNavigate($state, $rootScope, true);
+        } else {
+          // No more packages, go to the welcome page
+          $state.go('account.welcome');
+        }
       });;
     }, function(status) {
       // reject
@@ -639,10 +632,10 @@ angular.module('starter.controllers', [])
   }
 })
 
-.controller('OrderPaymentMethodCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, OrderService) {
+.controller('OrderPaymentMethodCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, $stateParams, OrderService) {
 
   $scope.$on('$ionicView.enter', function(e) {
-    $scope.order = OrderService.getCurrentOrder();
+    $scope.package = JSON.parse($stateParams.packageJson || null);
     $scope.paymentMethods = OrderService.getPaymentMethods();
   });
 
@@ -650,28 +643,30 @@ angular.module('starter.controllers', [])
 
     for(var i = 0; i < $scope.paymentMethods.length; ++i) {
       if ($scope.paymentMethods[i].Id == paymentMethodId) {
-        $scope.order.PaymentMethod = $scope.paymentMethods[i];
+        $scope.package.PaymentMethod = $scope.paymentMethods[i];
         break;
       }
     }
 
-    // We have selected the new paymentMethod. Go back.
+    // We have selected the new paymentMethod. Replace the package json and go back
+    var packageString = JSON.stringify($scope.package);
+    $ionicHistory.backView().stateParams = { packageJson: packageString, resetActuals: false, canEditPayment: true };
     $ionicHistory.goBack();
   },
 
   $scope.isPaymentMethodSelected = function(paymentMethodId) {
-    return $scope.order.PaymentMethod.Id == paymentMethodId;
+    return $scope.package.PaymentMethod.Id == paymentMethodId;
   }
 })
 
-.controller('AccountCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, CourierService, LoginService) {
+.controller('AccountCtrl', function($rootScope, $scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, CourierService, LoginService) {
 
   $scope.$on('$ionicView.enter', function(e) {
     $scope.courier = CourierService.getCurrentCourier();
   });
 
   $scope.logoutUser = function() {
-    LoginService.logoutUser();
+    CourierService.logoutCourier($rootScope);
 
     $ionicHistory.clearHistory();
     $ionicHistory.nextViewOptions({ disableBack: true });
@@ -714,14 +709,6 @@ angular.module('starter.controllers', [])
       }
   };
 
-  $scope.logoutUser = function() {
-    LoginService.logoutUser();
-
-    $ionicHistory.clearHistory();
-    $ionicHistory.nextViewOptions({ disableBack: true });
-
-    $state.go('account.login');
-  }
 })
 
 

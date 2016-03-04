@@ -1,54 +1,5 @@
 angular.module('starter.services', [])
 
-.factory('Chats', function() {
-  // Might use a resource here that returns a JSON array
-
-  // Some fake testing data
-  var chats = [{
-    id: 0,
-    name: 'Ben Sparrow',
-    lastText: 'You on your way?',
-    face: 'img/ben.png'
-  }, {
-    id: 1,
-    name: 'Max Lynx',
-    lastText: 'Hey, it\'s me',
-    face: 'img/max.png'
-  }, {
-    id: 2,
-    name: 'Adam Bradleyson',
-    lastText: 'I should buy a boat',
-    face: 'img/adam.jpg'
-  }, {
-    id: 3,
-    name: 'Perry Governor',
-    lastText: 'Look at my mukluks!',
-    face: 'img/perry.png'
-  }, {
-    id: 4,
-    name: 'Mike Harrington',
-    lastText: 'This is wicked good ice cream.',
-    face: 'img/mike.png'
-  }];
-
-  return {
-    all: function() {
-      return chats;
-    },
-    remove: function(chat) {
-      chats.splice(chats.indexOf(chat), 1);
-    },
-    get: function(chatId) {
-      for (var i = 0; i < chats.length; i++) {
-        if (chats[i].id === parseInt(chatId)) {
-          return chats[i];
-        }
-      }
-      return null;
-    }
-  };
-})
-
 .factory('ConstantsService', function(WEB_API_BASE_TEST, WEB_API_BASE_PROD, WEB_API_BASE_LOCAL) {
   return {
     webApiBase : function() {
@@ -62,6 +13,18 @@ angular.module('starter.services', [])
     },
     webApiOrder : function() {
       return this.webApiCourier() + '/order';
+    },
+    webApiOrderPackage : function() {
+      return this.webApiOrder() + '/package';
+    },
+    webApiOrderPackages : function() {
+      return this.webApiOrder() + '/packages';
+    },
+    webApiClient : function() {
+      return this.webApiCourier() + '/client';
+    },
+    webApiClientPackages : function() {
+      return this.webApiClient() + '/packages';
     },
     webApiPaymentMethods : function() {
       return this.webApiBase() + '/paymentMethods';
@@ -171,65 +134,62 @@ angular.module('starter.services', [])
 
             // deferred.reject(data);
           });
-      },
-
-      /////////////////////////////////////////////////
-      logoutUser: function() {
-        // Don't delete credentials, so we can auto-fill it next time again
-        // this.deleteCredentials();
-        this.deleteAuthToken();
-
-        HttpHeaderService.removeDefaultAuthHeader();
-
-        // TODO: More cleanup about current user etc.
       }
+
     }
 })
 
-.factory('UserService', function($q) {
+// .factory('UserService', function($q) {
 
-  var currentUser = null;
+//   var currentUser = null;
 
-  return {
+//   return {
 
-    /////////////////////////////////////////////////
-    setAsCurrent: function(user) {
-      currentUser = user;
-      return user;
-    },
+//     /////////////////////////////////////////////////
+//     setAsCurrent: function(user) {
+//       currentUser = user;
+//       return user;
+//     },
 
-    /////////////////////////////////////////////////
-    getCurrent: function() {
-      return user;
-    }
-  }
-})
+//     /////////////////////////////////////////////////
+//     getCurrent: function() {
+//       return user;
+//     }
+//   }
+// })
 
 .factory('CourierService', function($q, $http, ConstantsService) {
 
-  var self = this;
-  var currentCourier = null;
-
   return {
 
     /////////////////////////////////////////////////
-    getCurrentCourier: function() {
-      return self.currentCourier;
-    },
-
-    /////////////////////////////////////////////////
-    getCourier: function() {
+    getCourier: function($rootScope) {
+      // var scope = $rootScope;
       return $q(function(resolve, reject) {
         $http.get(ConstantsService.webApiCourier()).success(function(data, status, headers, config) {
           console.log(data);
-          self.currentCourier = data;
+          // Set this courier as the default courier for going forward, until logout
+          $rootScope.courier = data;
           resolve(data);
         }).error(function(data, status, headers, config) {
           console.log(data);
-          self.currentCourier = null;
+          $rootScope.courier = null;
           reject();
         });
       });
+    },
+
+    /////////////////////////////////////////////////
+    logoutCourier: function($rootScope) {
+      // Don't delete credentials, so we can auto-fill it next time again
+      this.deleteAuthToken();
+
+      HttpHeaderService.removeDefaultAuthHeader();
+
+      // Clear the globally set courier
+      $rootScope.courier = null;
+
+      // TODO: More cleanup about current user etc.
     }
   }
 })
@@ -237,34 +197,15 @@ angular.module('starter.services', [])
 .factory('OrderService', function($q, $http, ConstantsService) {
 
   var self = this;
+  // TODO: DenizDem !!!!!!!!! Remove this
   var currentOrder = null;
   var paymentMethods = null;
 
   return {
 
     /////////////////////////////////////////////////
-    getCurrentOrder: function() {
-      return self.currentOrder;
-    },
-
-    /////////////////////////////////////////////////
     getPaymentMethods: function() {
       return self.paymentMethods;
-    },
-
-    /////////////////////////////////////////////////
-    getOrder: function() {
-      return $q(function(resolve, reject) {
-        $http.get(ConstantsService.webApiOrder()).success(function(data, status, headers, config) {
-          console.log(data);
-          self.currentOrder = data;
-          resolve(data);
-        }).error(function(data, status, headers, config) {
-          console.log(data);
-          self.currentOrder = null;
-          reject();
-        });
-      });
     },
 
     /////////////////////////////////////////////////
@@ -305,16 +246,16 @@ angular.module('starter.services', [])
     },
 
     /////////////////////////////////////////////////
-    updateOrderStateToCourierWithClient: function() {
+    updateOrderStateToCourierWithClient: function($rootScope) {
       return $q(function(resolve, reject) {
 
-        var postData = {OrderId: self.currentOrder.Id, Status: OrderStatusEnum.CourierWithClient};
+        var postData = OrderStatusEnum.CourierWithClient;
 
         $http.post(ConstantsService.webApiOrder(), postData).success(function(data, status, headers, config) {
           console.log(data);
           // TODO: DenizDem - Should the request return the order again, so that we can be sure?
-          self.currentOrder.Status = OrderStatusEnum.CourierWithClient;
-          resolve(self.currentOrder);
+          $rootScope.courier.Order.Status = OrderStatusEnum.CourierWithClient;
+          resolve($rootScope.courier.Order);
         }).error(function(data, status, headers, config) {
           console.log(data);
           reject(status);
@@ -323,41 +264,16 @@ angular.module('starter.services', [])
     },
 
     /////////////////////////////////////////////////
-    updateOrderStateToCourierLeftClient: function() {
+    updateOrderStateToCourierLeftClient: function($rootScope) {
       return $q(function(resolve, reject) {
 
-        var postData = {OrderId: self.currentOrder.Id, Status: OrderStatusEnum.CourierLeftClient};
+        var postData = OrderStatusEnum.CourierLeftClient;
 
         $http.post(ConstantsService.webApiOrder(), postData).success(function(data, status, headers, config) {
           console.log(data);
           // TODO: DenizDem - Should the request return the order again, so that we can be sure?
-          self.currentOrder.Status = OrderStatusEnum.CourierLeftClient;
-          resolve(self.currentOrder);
-        }).error(function(data, status, headers, config) {
-          console.log(data);
-          reject(status);
-        });
-      });
-    },
-
-    /////////////////////////////////////////////////
-    updateOrderStateToDelivered: function() {
-      return $q(function(resolve, reject) {
-
-        var postData = {
-          OrderId: self.currentOrder.Id,
-          Status: OrderStatusEnum.Delivered,
-          Total: self.currentOrder.Total,
-          PaymentMethodId: self.currentOrder.PaymentMethod.Id
-        };
-
-        $http.post(ConstantsService.webApiOrder(), postData).success(function(data, status, headers, config) {
-          console.log(data);
-          // TODO: DenizDem - Should the request return the order again, so that we can be sure?
-          self.currentOrder.Status = OrderStatusEnum.Delivered;
-          var resultOrder = self.currentOrder;
-          self.currentOrder = null;
-          resolve(resultOrder);
+          $rootScope.courier.Order.Status = OrderStatusEnum.CourierLeftClient;
+          resolve($rootScope.courier.Order);
         }).error(function(data, status, headers, config) {
           console.log(data);
           reject(status);
@@ -370,19 +286,64 @@ angular.module('starter.services', [])
 
 .factory('PackageService', function($q, $http, ConstantsService) {
 
-  var self = this;
-
   return {
 
     /////////////////////////////////////////////////
-    getAllPackages: function(packages) { // TODO: DenizDem - Remove the parameter
+    getAllClientPackages: function() {
       return $q(function(resolve, reject) {
-        // TODO: DenizDem - Do the real call to get the packages
-        setTimeout(function() {
+        $http.get(ConstantsService.webApiClientPackages()).success(function(data, status, headers, config) {
+          console.log(data);
+          resolve(data);
+        }).error(function(data, status, headers, config) {
+          console.log(data);
+          reject();
+        });
+      });
+    },
+
+    /////////////////////////////////////////////////
+    updatePackageStageToDelivered: function(package) {
+
+      var postData = {packageId: package.Id, status: PackageStatusEnum.Delivered, total: package.Total, paymentMethodId: package.PaymentMethod.Id};
+
+      return $q(function(resolve, reject) {
+        $http.post(ConstantsService.webApiOrderPackage(), postData).success(function(data, status, headers, config) {
+          console.log(data);
+          package.Status = PackageStatusEnum.Delivered;
+          resolve(package);
+        }).error(function(data, status, headers, config) {
+          console.log(data);
+          reject();
+        });
+      });
+    },
+
+    /////////////////////////////////////////////////
+    assignPackagesToOrder: function($rootScope, packages) {
+
+      assert(packages.length > 0 , 'There should be at least one package we are assigning to order');
+      var postData = [];
+      for (var i = 0; i < packages.length; ++i)
+        postData.push(packages[i].Id);
+
+      return $q(function(resolve, reject) {
+        $http.post(ConstantsService.webApiOrderPackages(), postData).success(function(data, status, headers, config) {
+          console.log(data);
+          // Store the list of packages as the order packages of the current courier
+          for (var i = 0; i < packages.length; ++i) {
+            packages[i].Status = PackageStatusEnum.Assigned;
+          }
+
+          $rootScope.courier.Order.Packages = packages;
+
           resolve(packages);
-        }, 500);
+        }).error(function(data, status, headers, config) {
+          console.log(data);
+          reject();
+        });
       });
     }
+
   }
 })
 

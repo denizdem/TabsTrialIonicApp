@@ -1,15 +1,15 @@
 <ion-view view-title="Paket Teslimi" name="order-courierLeftClient-view" >
 
-  <ion-content class="" ng-model="order">
+  <ion-content class="" ng-model="courier">
     <br/>
     <h3 class="title text-center">Lütfen teslim etmek istediğiniz paketi seçiniz.</h3>
 
       <ion-item>
         <i class="icon icon-left ion-ios-box"></i>
-        Teslim Edilecek Paket Sayısı: {{packages.length}}
+        Teslim Edilecek Paket Sayısı: {{countOfDeliverablePackages()}}
       </ion-item>
 
-      <ion-item ng-repeat="package in packages" ng-style="{padding:0}" ng-click="packageClicked({{package}})">
+      <ion-item ng-repeat="package in courier.Order.Packages" ng-style="{padding:0}" ng-click="packageClicked({{package}})" ng-show="canDeliverPackage({{package.Id}})">
         <div class="list card" style="padding:0">
 
           <ion-item class="item item-divider item-icon-right item-energized">

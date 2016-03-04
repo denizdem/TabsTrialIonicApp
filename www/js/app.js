@@ -122,8 +122,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
   })
 
   .state('tab.order.paymentDetails', {
-    url: '/paymentDetails',
-    params: { proposedTotal:null, proposedPaymentMethodId:null },
+    url: '/paymentDetails/:packageJson/:resetActuals/:canEditPayment',
     views: {
       'tab-order-master': {
       templateUrl: 'templates/tab-order-paymentDetails.html',
@@ -133,7 +132,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
   })
 
   .state('tab.order.paymentMethod', {
-    url: '/paymentMethod',
+    url: '/paymentMethod/:packageJson',
     views: {
       'tab-order-master': {
       templateUrl: 'templates/tab-order-paymentMethod.html',
@@ -172,35 +171,6 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       }
     }
   })
-
-  // .state('tab.chats', {
-  //     url: '/chats',
-  //     views: {
-  //       'tab-chats': {
-  //         templateUrl: 'templates/tab-chats.html',
-  //         controller: 'ChatsCtrl'
-  //       }
-  //     }
-  //   })
-  //   .state('tab.chat-detail', {
-  //     url: '/chats/:chatId',
-  //     views: {
-  //       'tab-chats': {
-  //         templateUrl: 'templates/chat-detail.html',
-  //         controller: 'ChatDetailCtrl'
-  //       }
-  //     }
-  //   })
-
-  // .state('tab.account', {
-  //   url: '/account',
-  //   views: {
-  //     'tab-account': {
-  //       templateUrl: 'templates/tab-account.html',
-  //       controller: 'AccountCtrl'
-  //     }
-  //   }
-  // })
 
   .state('account', {
       url: '/account',

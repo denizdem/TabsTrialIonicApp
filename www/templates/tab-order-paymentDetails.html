@@ -1,19 +1,19 @@
 <ion-view view-title="Ödeme Detayları" name="order-paymentDetails-view" >
 
-  <ion-content class="" ng-model="order">
+  <ion-content class="" ng-model="package">
 
     <br/>
     <h3 class="title text-center">Ödeme Bilgierini Giriniz</h3>
 
     <div class="list">
 
-      <ion-toggle class="item" ng-click="toggleCanEdit()" toggle-class="toggle-balanced">Bilgileri Düzelt</ion-toggle>
+      <ion-toggle class="item" ng-click="toggleCanEdit()" ng-model="canEditPayment" toggle-class="toggle-balanced">Bilgileri Düzelt</ion-toggle>
 
       <ion-item class="item item-icon-left">
         <i class="icon ion-cash"></i>
         Tutar
         <label class="item-input">
-          <input type="number" ng-disabled="!canEditPayment" ng-model="order.Total"></input>
+          <input type="number" ng-disabled="!canEditPayment" ng-model="package.Total"></input>
         </label>
       </ion-item>
 
@@ -21,14 +21,14 @@
         <i class="icon ion-card"></i>
         Ödeme Tipi
         <span class="item-note" >
-          {{order.PaymentMethod.Name}} <label ng-style="{'display': canEditPayment ? 'inline':'none'}"> > </label>
+          {{package.PaymentMethod.Name}} <label ng-style="{'display': canEditPayment ? 'inline':'none'}"> > </label>
         </span>
       </ion-item>
 
     </div>
 
     <div class="list list-inset">
-        <button class="button button-block button-balanced" ng-click="closePackage()">
+        <button class="button button-block button-balanced" ng-click="closePackage(package)">
           <i class="icon icon-left ion-ios-checkmark-outline"></i>
           Siparişi Kapat
         </button>
