@@ -150,7 +150,7 @@ function checkIfCanDeliverPackage(package) {
 
 angular.module('starter.controllers', [])
 
-.controller('WelcomeCtrl', function($rootScope, $scope, $ionicLoading, $ionicHistory, $state, $http, $localstorage, LoginService, CourierService, OrderService, HttpHeaderService) {
+.controller('WelcomeCtrl', function($rootScope, $scope, $ionicLoading, $ionicHistory, $state, $http, $localstorage, LoginService, CourierService, HttpHeaderService) {
   $scope.$on('$ionicView.enter', function(e) {
     
     $ionicHistory.clearHistory();

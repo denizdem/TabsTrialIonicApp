@@ -158,7 +158,7 @@ angular.module('starter.services', [])
 //   }
 // })
 
-.factory('CourierService', function($q, $http, ConstantsService) {
+.factory('CourierService', function($q, $http, ConstantsService, LoginService, HttpHeaderService) {
 
   return {
 
@@ -182,7 +182,7 @@ angular.module('starter.services', [])
     /////////////////////////////////////////////////
     logoutCourier: function($rootScope) {
       // Don't delete credentials, so we can auto-fill it next time again
-      this.deleteAuthToken();
+      LoginService.deleteAuthToken();
 
       HttpHeaderService.removeDefaultAuthHeader();
 
