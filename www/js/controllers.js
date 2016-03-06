@@ -243,11 +243,11 @@ angular.module('starter.controllers', [])
         $ionicLoading.hide();
 
         $state.go('welcome.redirect');
-    }).error(function(data) {
+    }).error(function(data, status, headers) {
       $ionicLoading.hide();
       var alertPopup = $ionicPopup.alert({
           title: 'Sisteme girilemedi!',
-          template: 'Girdiginiz bilgileri kontrol edin.'
+          template: 'Girdiginiz bilgileri kontrol edin. Status: ' + String(status) + '. Headers:' + String(headers)
       });
     });
   }
