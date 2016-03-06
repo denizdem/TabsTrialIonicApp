@@ -107,11 +107,11 @@ function assert(condition, message) {
         throw message; // Fallback
     }
 }
-function checkCourierOrderStateAndNavigate($state, $rootScope, shouldReload) {
+function checkCourierOrderStateAndNavigate($state, $rootScope) {
   assert($rootScope.courier != null, 'We should have set a courier before asking for its state');
   if ($rootScope.courier.Order == null)
   {
-    $state.go('tab.order.notAssigned');
+    $state.go('app.order.notAssigned');
   }
   else
   {
@@ -125,15 +125,15 @@ function checkCourierOrderStateAndNavigate($state, $rootScope, shouldReload) {
         break;
 
       case OrderStatusEnum.CourierAssigned:
-        $state.go('tab.order.courierAssigned', {}, {reload: shouldReload});
+        $state.go('app.order.courierAssigned');
         break;
 
       case OrderStatusEnum.CourierWithClient:
-        $state.go('tab.order.courierWithClient', {}, {reload: shouldReload});
+        $state.go('app.order.courierWithClient');
         break;
 
       case OrderStatusEnum.CourierLeftClient:
-        $state.go('tab.order.courierLeftClient', {}, {reload: shouldReload});
+        $state.go('app.order.courierLeftClient');
         break;
 
       default:
@@ -150,7 +150,20 @@ function checkIfCanDeliverPackage(package) {
 
 angular.module('starter.controllers', [])
 
-.controller('WelcomeCtrl', function($rootScope, $scope, $ionicLoading, $ionicHistory, $state, $http, $localstorage, LoginService, CourierService, HttpHeaderService) {
+.controller('AppCtrl', function($scope, $rootScope, $state, $ionicHistory, CourierService) {
+
+  $scope.logout = function() {
+    CourierService.logoutCourier($rootScope);
+
+    $ionicHistory.clearHistory();
+    $ionicHistory.nextViewOptions({disableBack: true});
+
+    $state.go('welcome.login');
+  };
+
+})
+
+.controller('RedirectCtrl', function($rootScope, $scope, $ionicLoading, $ionicHistory, $state, $http, $localstorage, LoginService, CourierService, HttpHeaderService) {
   $scope.$on('$ionicView.enter', function(e) {
     
     $ionicHistory.clearHistory();
@@ -190,7 +203,7 @@ angular.module('starter.controllers', [])
 
         $ionicLoading.hide();
 
-        $state.go('account.login');
+        $state.go('welcome.login');
       });
     }
     else
@@ -202,7 +215,7 @@ angular.module('starter.controllers', [])
 
       $ionicLoading.hide();
 
-      $state.go('account.login');
+      $state.go('welcome.login');
     }
   });
 
@@ -229,7 +242,7 @@ angular.module('starter.controllers', [])
 
         $ionicLoading.hide();
 
-        $state.go('account.welcome');
+        $state.go('welcome.redirect');
     }).error(function(data) {
       $ionicLoading.hide();
       var alertPopup = $ionicPopup.alert({
@@ -313,26 +326,7 @@ angular.module('starter.controllers', [])
 
 })
 
-.controller('OrderCourierWithClientCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, OrderService) {
-
-  $scope.isClientDetailsExpanded = true;
-  $scope.isOpDetailsExpanded = false;
-
-  $scope.choosePackages = function() {
-    $state.go('tab.order.chooseOrderPackages');
-  },
-
-  $scope.toggleOpDetailsExpanded = function() {
-    $scope.isOpDetailsExpanded = !$scope.isOpDetailsExpanded;
-  },
-
-  $scope.toggleClientDetailsExpanded = function() {
-    $scope.isClientDetailsExpanded = !$scope.isClientDetailsExpanded;
-  }
-
-})
-
-.controller('OrderChooseOrderPackagesCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, $stateParams, OrderService, PackageService) {
+.controller('OrderCourierWithClientCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, $stateParams, OrderService, PackageService) {
 
   $scope.currentPackages = [];
 
@@ -413,7 +407,7 @@ angular.module('starter.controllers', [])
     assert($scope.currentPackages.length > 0, 'We should have chosen at least one package before allowing the click.');
 
     var chosenPackagesString = JSON.stringify($scope.currentPackages);
-    $state.go('tab.order.verifyChosenOrderPackages', { chosenPackagesJson: chosenPackagesString});
+    $state.go('app.order.verifyChosenOrderPackages', { chosenPackagesJson: chosenPackagesString});
 
   }
 
@@ -429,7 +423,7 @@ angular.module('starter.controllers', [])
   },
 
   $scope.chosePackagesAgain = function() {
-    $state.go('tab.order.chooseOrderPackages', {keepPackages: true});
+    $state.go('app.order.courierWithClient', {keepPackages: true});
   },
 
   $scope.advanceToOutForDelivery = function() {
@@ -449,7 +443,7 @@ angular.module('starter.controllers', [])
 
         $ionicLoading.hide();
 
-        $state.go('tab.order.courierLeftClient');
+        $state.go('app.order.courierLeftClient');
       }, function(status) {
         $ionicLoading.hide();
 
@@ -497,7 +491,7 @@ angular.module('starter.controllers', [])
   $scope.packageClicked = function(package) {
 
     var packageString = JSON.stringify(package);
-    $state.go('tab.order.deliverPackage', { packageJson: packageString});
+    $state.go('app.order.deliverPackage', { packageJson: packageString});
 
   }
 
@@ -524,7 +518,7 @@ angular.module('starter.controllers', [])
       // Go to the payment details page
       var packageString = JSON.stringify($scope.package);
 
-      $state.go('tab.order.paymentDetails', { packageJson: packageString, resetActuals: true, canEditPayment: false });
+      $state.go('app.order.paymentDetails', { packageJson: packageString, resetActuals: true, canEditPayment: false });
     }, function(status) {
       // reject
 
@@ -579,7 +573,7 @@ angular.module('starter.controllers', [])
     if ($scope.canEditPayment)
     {
       var packageString = JSON.stringify($scope.package);
-      $state.go('tab.order.paymentMethod', { packageJson: packageString });
+      $state.go('app.order.paymentMethod', { packageJson: packageString });
     }
   },
 
@@ -617,7 +611,7 @@ angular.module('starter.controllers', [])
           checkCourierOrderStateAndNavigate($state, $rootScope, true);
         } else {
           // No more packages, go to the welcome page
-          $state.go('account.welcome');
+          $state.go('welcome.redirect');
         }
       });;
     }, function(status) {
@@ -659,31 +653,9 @@ angular.module('starter.controllers', [])
   }
 })
 
-.controller('AccountCtrl', function($rootScope, $scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, CourierService, LoginService) {
+.controller('AccountHistoryCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, PackageService) {
 
-  $scope.$on('$ionicView.enter', function(e) {
-    $scope.courier = CourierService.getCurrentCourier();
-  });
-
-  $scope.logoutUser = function() {
-    CourierService.logoutCourier($rootScope);
-
-    $ionicHistory.clearHistory();
-    $ionicHistory.nextViewOptions({ disableBack: true });
-
-    $state.go('account.login');
-  }
-})
-
-.controller('AccountHistoryCtrl', function($scope, $ionicPopup, $ionicLoading, $ionicHistory, $state, CourierService, LoginService) {
-
-  $scope.$on('$ionicView.enter', function(e) {
-    $scope.courier = CourierService.getCurrentCourier();
-  });
-
-  var self = this;
-
-  $scope.packages = testPackages;
+  $scope.packages = null;
 
   $scope.onezoneDatepicker = {
       date: new Date(),
@@ -704,9 +676,42 @@ angular.module('starter.controllers', [])
       // hideSetButton: false,
       // highlights: highlights,
       callback: function(value){
-          // TODO: DenizDem - Retrieve the new packages.
-          $scope.packages = self.testPackages;
+        $scope.retrievePackages(value);
       }
+  };
+
+  $scope.$on('$ionicView.enter', function(e) {
+    if ($scope.packages == null)
+      $scope.retrievePackages($scope.onezoneDatepicker.date);
+  });
+
+  $scope.retrievePackages = function(date) {
+    $scope.packages = [];
+
+    $ionicLoading.show(templateOfLoading);
+
+    PackageService.getPastClientPackages(date).then(function(orders) {
+
+      for (var i = 0; i < orders.length; ++i) {
+        if (orders[i].Packages != null) {
+          for (var j = 0; j < orders[i].Packages.length; ++j) {
+            var package = orders[i].Packages[j];
+            package.order = orders[i];
+            $scope.packages.push(package);
+          }
+        }
+      }
+      $ionicLoading.hide();
+    }, function(status) {
+      // reject
+
+      $ionicLoading.hide();
+
+      var alertPopup = $ionicPopup.alert({
+        title: 'Bir hata oluştu.',
+        template: 'Hata: ' + status
+      });
+    });
   };
 
 })

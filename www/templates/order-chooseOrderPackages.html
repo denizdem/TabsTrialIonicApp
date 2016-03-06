@@ -1,17 +1,19 @@
 <ion-view view-title="Lütfen Paketleri Seçiniz">
-  <ion-content ng-model="order" has-header="true" has-tabs="true">
+  <ion-content ng-model="order">
     <ion-list>
 
-      <ion-item class="legend" ng-style="{padding:0}">
-        <button class="button button-block button-stable" ng-click="refreshCurrentPackages()">
+      <ion-item class="legend">
+        <button class="button button-block button-calm" ng-click="refreshCurrentPackages()" style="height:40px">
           <i class="icon icon-left ion-refresh"></i>
           Yenile
         </button>
       </ion-item>
 
-      <ion-item ng-repeat="package in packages" ng-style="{padding:0}">
-        <div ng-include src="'templates/OrderPackageDetailsListCardTemplate.html'"></div>
-      </ion-item>
+      <ion-list>
+        <ion-item class="no-vertical-padding item-borderless" ng-repeat="package in packages">
+          <div ng-include src="'templates/OrderPackageDetailsListCardTemplate.html'"></div>
+        </ion-item>
+      </ion-list>
 
       <div class="list list-inset">
 

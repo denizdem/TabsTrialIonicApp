@@ -1,0 +1,58 @@
+<ion-view view-title="Paket Teslimi" name="order-courierLeftClient-view" >
+
+  <ion-content class="" ng-model="courier">
+    <h3 class="title text-center">Lütfen teslim etmek istediğiniz paketi seçiniz.</h3>
+
+    <ion-item class="item-borderless">
+      <i class="icon icon-left ion-ios-box"></i>
+      Teslim Edilecek Paket Sayısı: {{countOfDeliverablePackages()}}
+    </ion-item>
+
+    <ion-item ng-repeat="package in courier.Order.Packages" class="item-borderless no-vertical-padding" ng-click="packageClicked({{package}})" ng-show="canDeliverPackage({{package.Id}})">
+      <ion-list>
+
+        <ion-item class="item item-divider item-icon-right item-energized card-header">
+          <i class="icon ion-chevron-right"></i>
+          <span style="display:inline-block, font-weight:bold">Tutar: {{package.ProposedTotal}} TRY - {{package.ProposedPaymentMethod.Name}}</span>
+        </ion-item>
+
+        <ion-list>
+          <ion-item class="card-item">
+            <span class="input-label positive text-bold" style="padding:0">Adres</span>
+            <span class="item-text-wrap" style="padding:0">{{package.DeliveryAddress}}</span>
+          </ion-item>
+          <ion-item class="card-item">
+            <span class="input-label positive text-bold" style="padding:0">Not</span>
+            <span class="item-text-wrap" style="padding:0">{{package.ClientNotes}}</span>
+          </ion-item>
+        </ion-list>
+
+        <br>
+      </ion-list>
+
+    </ion-item>
+
+
+<!--       <ion-item ng-repeat="package in courier.Order.Packages" ng-style="{padding:0}" ng-click="packageClicked({{package}})" ng-show="canDeliverPackage({{package.Id}})">
+        <div class="list card" style="padding:0">
+
+          <ion-item class="item item-divider item-icon-right item-energized">
+            <i class="icon ion-chevron-right"></i>
+            <span style="display:inline-block, font-weight:bold">Tutar: {{package.ProposedTotal}} TRY - {{package.ProposedPaymentMethod.Name}}</span>
+          </ion-item>
+
+          <ion-item class="item" ng-style="{'padding':'3'}">
+
+              <span class="input-label positive text-bold" style="padding:0">Adres</span>
+              <span class="item-text-wrap" style="padding:0">{{package.DeliveryAddress}}</span>
+              <hr>
+              <span class="input-label positive text-bold" style="padding:0">Not</span>
+              <span class="item-text-wrap" style="padding:0">{{package.ClientNotes}}</span>
+
+          </ion-item>
+
+         </div>
+      </ion-item>
+ -->
+  </ion-content>
+</ion-view>

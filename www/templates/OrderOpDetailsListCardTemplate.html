@@ -1,12 +1,13 @@
     <div class="list card">
-      <div class="item item-divider" ng-click="toggleOpDetailsExpanded()">
+      <div class="item item-divider card-header item-icon-right" ng-click="toggleOpDetailsExpanded()">
+        <i ng-class="[icon, isOpDetailsExpanded ? 'ion-chevron-up' : 'ion-chevron-down', isOpDetailsExpanded ? 'calm' : 'positive']" class="icon positive"></i>
         <h3>Operator: {{courier.Order.Operator.FullName}}</h3>
       </div>
 
-      <div class="item" ng-show="isOpDetailsExpanded">
+      <div class="item card-item" ng-show="isOpDetailsExpanded">
           <span class="input-label positive text-bold">
             Telefon:
-            <a class="padding-left" ng-href="tel: 0{{courier.Order.Operator.Phone}}">{{courier.Order.Operator.Phone}}</a>
+            <a class="padding-left" ng-href="tel:0{{courier.Order.Operator.Phone}}">{{courier.Order.Operator.Phone}}</a>
           </span>
       </div> <!-- Item Content -->
 

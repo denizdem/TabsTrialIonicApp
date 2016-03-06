@@ -1,0 +1,43 @@
+<ion-view view-title="Paket Kontrol">
+  <ion-content ng-model="order" has-header="true" has-tabs="true">
+    <ion-list>
+
+      <h3 class="title text-center">Lütfen seçtiğiniz paketlerin doğruluğunu kontrol ediniz.</h3>
+
+      <ion-item class="item-borderless">
+        <i class="icon icon-left ion-ios-box"></i>
+        Seçtiğiniz Paket Sayısı: {{packages.length}}
+      </ion-item>
+
+      <ion-item class="item-borderless">
+        <ion-list>
+          <ion-item class="item-borderless" ng-repeat="package in packages" ng-style="{padding:0}">
+            <div ng-include src="'templates/OrderPackageDetailsListCardTemplate.html'"></div>
+          </ion-item>
+        </ion-list>
+      </ion-item>
+
+        <div class="row">
+          <div class="col">
+            <button class="button button-block button-assertive no-padding" ng-click="chosePackagesAgain()">
+              <div class="item-icon-left">
+                <i class="icon ion-chevron-left"></i>
+                Tekrar Seç
+              </div>
+            </button>
+          </div> <!-- Col -->
+          
+          <div class="col">
+            <button class="button button-block button-balanced no-padding" ng-click="advanceToOutForDelivery()">
+              <div class="item-icon-right">
+                <i class="icon ion-chevron-right"></i>
+                Teslimata Başla
+              </div>
+            </button>
+          </div><!-- Col -->
+        </div> <!-- Row -->
+
+
+    </ion-list>
+  </ion-content>
+</ion-view>

@@ -1,34 +1,50 @@
     <div class="list card">
 
-      <ion-item class="item-divider" ng-click="toggleDeliveryDetailsExpanded()">
+      <ion-item class="item-divider card-header item-icon-right" ng-click="toggleDeliveryDetailsExpanded()">
+        <i ng-class="[icon, isDeliveryDetailsExpanded ? 'ion-chevron-up' : 'ion-chevron-down', isDeliveryDetailsExpanded ? 'calm' : 'positive']" class="icon positive"></i>
         <h3>Detaylar</h3>
       </ion-item>
 
-      <ion-item class="item" ng-show="isDeliveryDetailsExpanded">
+      <ion-list ng-show="isDeliveryDetailsExpanded">
+
+        <ion-item class="card-item">
           <span class="input-label positive text-bold">Adres</span>
           <span class="item-text-wrap">{{package.DeliveryAddress}}</span>
-          <hr>
+        </ion-item>
+
+        <ion-item class="card-item">
           <span class="input-label positive text-bold">Notlar</span>
           <span class="item-text-wrap">{{package.ClientNotes}}</span>
-          <hr>
+        </ion-item>
+
+        <ion-item class="card-item">
           <span class="input-label positive" style="display:inline-block">
             Tutar:
           </span>
           <span style="display:inline-block">{{package.ProposedTotal}}</span>
-          <hr>
+        </ion-item>
+
+        <ion-item class="card-item">
           <span class="input-label positive" style="display:inline-block">
             Ödeme Tipi:
           </span>
           <span style="display:inline-block">{{package.ProposedPaymentMethod.Name}}</span>
-          <hr>
+        </ion-item>
 
-        <div class="list list-inset">
+        <ion-item class="card-item">
+          <span class="input-label positive" style="display:inline-block">
+            Ödeme Tipi:
+          </span>
+          <span style="display:inline-block">{{package.ProposedPaymentMethod.Name}}</span>
+        </ion-item>
+
+      <!-- ion-item class="card-item card-item-end-padding">
           <a class="button button-block button-energized" ng-href="tel: 0{{package.EndUserPhone}}">
             <i class="icon icon-left ion-ios-telephone-outline"></i>
             Müşteriyi Ara
           </a>
-        </div>
-     </ion-item> <!-- Item Content -->
+        </ion-item-->
+      </ion-list>
 
     </div> <!-- List Item -->
 

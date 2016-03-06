@@ -14,6 +14,9 @@ angular.module('starter.services', [])
     webApiOrder : function() {
       return this.webApiCourier() + '/order';
     },
+    webApiOrders : function() {
+      return this.webApiCourier() + '/orders';
+    },
     webApiOrderPackage : function() {
       return this.webApiOrder() + '/package';
     },
@@ -138,25 +141,6 @@ angular.module('starter.services', [])
 
     }
 })
-
-// .factory('UserService', function($q) {
-
-//   var currentUser = null;
-
-//   return {
-
-//     /////////////////////////////////////////////////
-//     setAsCurrent: function(user) {
-//       currentUser = user;
-//       return user;
-//     },
-
-//     /////////////////////////////////////////////////
-//     getCurrent: function() {
-//       return user;
-//     }
-//   }
-// })
 
 .factory('CourierService', function($q, $http, ConstantsService, LoginService, HttpHeaderService) {
 
@@ -292,6 +276,22 @@ angular.module('starter.services', [])
     getAllClientPackages: function() {
       return $q(function(resolve, reject) {
         $http.get(ConstantsService.webApiClientPackages()).success(function(data, status, headers, config) {
+          console.log(data);
+          resolve(data);
+        }).error(function(data, status, headers, config) {
+          console.log(data);
+          reject();
+        });
+      });
+    },
+
+    /////////////////////////////////////////////////
+    getPastClientPackages: function(date) {
+      return $q(function(resolve, reject) {
+        var url = ConstantsService.webApiOrders();
+        // Append the date to the end of the url
+        url = url + '/' + String(date.getMonth() + 1) + '-' + String(date.getDate()) + '-' + String(date.getFullYear());
+        $http.get(url).success(function(data, status, headers, config) {
           console.log(data);
           resolve(data);
         }).error(function(data, status, headers, config) {

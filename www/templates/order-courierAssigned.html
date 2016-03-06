@@ -1,0 +1,17 @@
+<ion-view view-title="Lütfen restorana gidiniz" name="order-courierAssigned-view" >
+
+  <ion-content ng-model="courier">
+    <h3 class="title text-center">{{courier.Order.Client.Name}}</h3>
+
+    <span ng-include src="'templates/OrderClientDetailsListCardTemplate.html'"></span>
+    <span ng-include src="'templates/OrderOpDetailsListCardTemplate.html'"></span>
+
+    <div class="list list-inset">
+      <button class="button button-block button-balanced" ng-click="arriveAtClient()">
+        <i class="icon icon-left ion-android-restaurant"></i>
+        Restorana Vardım
+      </button>
+    </div>
+
+  </ion-content>
+</ion-view>

@@ -1,28 +1,37 @@
     <div class="list card">
 
-      <ion-item class="item-divider" ng-click="toggleClientDetailsExpanded()">
-        <h3>Restoran: {{courier.Order.Client.Name}}</h3>
+      <ion-item class="item-divider card-header item-icon-right" ng-click="toggleClientDetailsExpanded()">
+        <i ng-class="[icon, isClientDetailsExpanded ? 'ion-chevron-up' : 'ion-chevron-down', isClientDetailsExpanded ? 'calm' : 'positive']" class="icon positive"></i>
+        <h3>Restoran</h3>
       </ion-item>
 
-      <ion-item class="item" ng-show="isClientDetailsExpanded">
+      <ion-list ng-show="isClientDetailsExpanded">
 
+        <ion-item class="card-item">
           <span class="input-label positive text-bold">Adres</span>
           <span class="item-text-wrap">{{courier.Order.Client.Address}}</span>
-          <hr>
+        </ion-item>
+
+        <ion-item class="card-item">
           <span class="input-label positive text-bold">Tarif</span>
           <span class="item-text-wrap">{{courier.Order.Client.AddressDescription}}</span>
-          <hr>
+        </ion-item>
+
+        <ion-item class="card-item">
           <span class="input-label positive text-bold">
             Telefon:
-            <a class="padding-left" ng-href="tel: 0{{order.Client.Phone}}">{{courier.Order.Client.Phone}}</a>
+            <a class="padding-left" ng-href="tel:0{{courier.Order.Client.Phone}}">{{courier.Order.Client.Phone}}</a>
           </span>
-          <hr>
+        </ion-item>
+
+        <ion-item class="card-item">
           <span class="input-label positive text-bold">
             İrtibat:
-            <a class="padding-left" ng-href="tel: 0{{order.Client.ContactPhone}}">{{courier.Order.Client.ContactName}}</a>
+            <a class="padding-left" ng-href="tel:0{{courier.Order.Client.ContactPhone}}">{{courier.Order.Client.ContactName}}</a>
           </span>
+        </ion-item>
 
-      </ion-item> <!-- Item Content -->
+      </ion-list>
 
-    </div> <!-- List Item -->
+    </div>
 

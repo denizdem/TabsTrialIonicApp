@@ -5,7 +5,7 @@
 // the 2nd parameter is an array of 'requires'
 // 'starter.services' is found in services.js
 // 'starter.controllers' is found in controllers.js
-angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', 'starter.constants', 'onezone-datepicker'])
+angular.module('starter', ['ionic', 'starter.controllers', 'starter.directives', 'starter.services', 'starter.constants', 'onezone-datepicker'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
@@ -31,174 +31,153 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
   // Each state's controller can be found in controllers.js
   $stateProvider
 
-  // setup an abstract state for the tabs directive
-    .state('tab', {
-    url: '/tab',
+  .state('app', {
+    url: '/app',
     abstract: true,
-    templateUrl: 'templates/tabs.html'
+    templateUrl: 'templates/mainMenu.html',
+    controller: 'AppCtrl'
   })
 
-  // Each tab has its own nav history stack:
-
   ///////////////////// ORDER ////////////////////////////
-  .state('tab.order', {
+  .state('app.order', {
     url: '/order',
     abstract: true,
     views: {
-      'tab-order': {
-      templateUrl: 'templates/tab-order.html',
+      'mainMenuContent': {
+      templateUrl: 'templates/order.html',
       }
     }
   })
 
-  .state('tab.order.notAssigned', {
+  .state('app.order.notAssigned', {
     url: '/notAssigned',
     views: {
-      'tab-order-master': {
-      templateUrl: 'templates/tab-order-notAssigned.html',
+      'orderContent': {
+      templateUrl: 'templates/order-notAssigned.html',
       controller: 'OrderNotAssignedCtrl'
       }
     }
   })
 
-  .state('tab.order.courierAssigned', {
+  .state('app.order.courierAssigned', {
     url: '/courierAssigned',
     views: {
-      'tab-order-master': {
-      templateUrl: 'templates/tab-order-courierAssigned.html',
+      'orderContent': {
+      templateUrl: 'templates/order-courierAssigned.html',
       controller: 'OrderCourierAssignedCtrl'
       }
     }
   })
 
-  .state('tab.order.courierWithClient', {
+  .state('app.order.courierWithClient', {
     url: '/courierWithClient',
     views: {
-      'tab-order-master': {
-      templateUrl: 'templates/tab-order-courierWithClient.html',
+      'orderContent': {
+      templateUrl: 'templates/order-courierWithClient.html',
       controller: 'OrderCourierWithClientCtrl'
       }
     }
   })
 
-  .state('tab.order.chooseOrderPackages', {
-    url: '/chooseOrderPackages/:keepPackages',
-    views: {
-      'tab-order-master': {
-      templateUrl: 'templates/tab-order-chooseOrderPackages.html',
-      controller: 'OrderChooseOrderPackagesCtrl'
-      }
-    }
-  })
-
-  .state('tab.order.verifyChosenOrderPackages', {
+  .state('app.order.verifyChosenOrderPackages', {
     url: '/verifyChoosenOrderPackages/:chosenPackagesJson',
     views: {
-      'tab-order-master': {
-      templateUrl: 'templates/tab-order-verifyChoosenOrderPackages.html',
+      'orderContent': {
+      templateUrl: 'templates/order-verifyChoosenOrderPackages.html',
       controller: 'OrderVerifyChosenOrderPackagesCtrl'
       }
     }
   })
 
-  .state('tab.order.courierLeftClient', {
+  .state('app.order.courierLeftClient', {
     url: '/courierLeftClient',
     views: {
-      'tab-order-master': {
-      templateUrl: 'templates/tab-order-courierLeftClient.html',
+      'orderContent': {
+      templateUrl: 'templates/order-courierLeftClient.html',
       controller: 'OrderCourierLeftClientCtrl'
       }
     }
   })
 
-  .state('tab.order.deliverPackage', {
+  .state('app.order.deliverPackage', {
     url: '/deliverPackage/:packageJson',
     views: {
-      'tab-order-master': {
-      templateUrl: 'templates/tab-order-deliverPackage.html',
+      'orderContent': {
+      templateUrl: 'templates/order-deliverPackage.html',
       controller: 'OrderDeliverPackageCtrl'
       }
     }
   })
 
-  .state('tab.order.paymentDetails', {
+  .state('app.order.paymentDetails', {
     url: '/paymentDetails/:packageJson/:resetActuals/:canEditPayment',
     views: {
-      'tab-order-master': {
-      templateUrl: 'templates/tab-order-paymentDetails.html',
+      'orderContent': {
+      templateUrl: 'templates/order-paymentDetails.html',
       controller: 'OrderPaymentDetailsCtrl'
       }
     }
   })
 
-  .state('tab.order.paymentMethod', {
+  .state('app.order.paymentMethod', {
     url: '/paymentMethod/:packageJson',
     views: {
-      'tab-order-master': {
-      templateUrl: 'templates/tab-order-paymentMethod.html',
+      'orderContent': {
+      templateUrl: 'templates/order-paymentMethod.html',
       controller: 'OrderPaymentMethodCtrl'
       }
     }
   })
 
   ///////////////////// ACCOUNT ////////////////////////////
-  .state('tab.account', {
+  .state('app.account', {
     url: '/account',
     abstract: true,
     views: {
-      'tab-account': {
-      templateUrl: 'templates/tab-account.html',
+      'mainMenuContent': {
+      templateUrl: 'templates/account.html',
       }
     }
   })
 
-  .state('tab.account.main', {
-    url: '/main',
-    views: {
-      'tab-account-master': {
-      templateUrl: 'templates/tab-account-main.html',
-      controller: 'AccountCtrl'
-      }
-    }
-  })
-
-  .state('tab.account.history', {
+  .state('app.account.history', {
     url: '/history',
     views: {
-      'tab-account-master': {
-      templateUrl: 'templates/tab-account-history.html',
+      'accountContent': {
+      templateUrl: 'templates/account-history.html',
       controller: 'AccountHistoryCtrl'
       }
     }
   })
 
-  .state('account', {
-      url: '/account',
+  ///////////////////// WELCOME ////////////////////////////
+  .state('welcome', {
+      url: '/welcome',
       abstract: true,
-      templateUrl: 'templates/accountmaster.html'
+      templateUrl: 'templates/welcome.html'
     })
 
-  .state('account.login', {
+  .state('welcome.login', {
     url: '/login',
     views: {
-      'menuContent': {
-        templateUrl: 'templates/login.html',
+      'welcomeContent': {
+        templateUrl: 'templates/welcome-login.html',
         controller: 'LoginCtrl'
       }
     }
   })
 
-  .state('account.welcome', {
-    url: '/welcome',
+  .state('welcome.redirect', {
+    url: '/redirect',
     views: {
-       'menuContent': {
-          templateUrl: 'templates/welcome.html',
-          controller: 'WelcomeCtrl'
+       'welcomeContent': {
+          templateUrl: 'templates/welcome-redirect.html',
+          controller: 'RedirectCtrl'
       }
     }
   })
 
   // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/account/welcome');
+  $urlRouterProvider.otherwise('/welcome/redirect');
 
 });
