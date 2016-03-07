@@ -21,6 +21,12 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       StatusBar.styleDefault();
     }
   });
+
+  $ionicPlatform.on('resume', function(){
+      var alertPopup = $ionicPopup.alert({
+          title: 'Resume!',
+          template: 'Resume happened.'});
+  });
 })
 
 .config(function($stateProvider, $urlRouterProvider) {
