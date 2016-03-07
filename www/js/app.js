@@ -167,6 +167,16 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
     }
   })
 
+  .state('welcome.loginDetails', {
+    url: '/loginDetails',
+    views: {
+      'welcomeContent': {
+        templateUrl: 'templates/welcome-loginDetails.html',
+        controller: 'LoginDetailsCtrl'
+      }
+    }
+  })
+
   .state('welcome.redirect', {
     url: '/redirect',
     views: {

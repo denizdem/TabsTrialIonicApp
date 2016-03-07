@@ -1,9 +1,17 @@
 angular.module('starter.services', [])
 
 .factory('ConstantsService', function(WEB_API_BASE_TEST, WEB_API_BASE_PROD, WEB_API_BASE_LOCAL) {
+  var defaultWebApiBaseAddress = WEB_API_BASE_PROD;
+  var webApiBaseAddress = defaultWebApiBaseAddress;
   return {
+    setWebApiBase : function(address) {
+      webApiBaseAddress = address;
+    },
+    resetWebApiBase : function() {
+      webApiBaseAddress = defaultWebApiBaseAddress;
+    },
     webApiBase : function() {
-      return WEB_API_BASE_TEST;
+      return webApiBaseAddress;
     },
     webApiToken : function() {
       return this.webApiBase() + '/token';

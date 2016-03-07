@@ -1,81 +1,6 @@
 var templateOfLoading = {template: '<ion-spinner></ion-spinner><br/>Yükleniyor...'};
 
-  // TODO: DenizDem - Retrieve these from web api
-
-  var testOperator = {
-    Id: 3,
-    Name: 'DevranTest',
-    Surname: 'KaramanTest',
-    Phone: '(123)4567890',
-    Phone2: '(321)4567890',
-    FullName: 'DevranTest KaramanTest'
-  };
-
-  var testOperator2 = {
-    Id: 5,
-    Name: 'OpTest',
-    Surname: 'OpSurTest',
-    Phone: '(123)0987654',
-    Phone2: '(321)0987654',
-    FullName: 'OpTest OpSurTest'
-  };
-
-  var testClient = {
-    Id: 101,
-    Name: 'Demo1',
-    FullName: 'Demo1 A.S.',
-    Phone: '(890)1234567',
-    Phone2: '(890)7654321',
-    Phone3: '(098)1234567',
-    Address: 'Demo Address',
-    AddressDescription: 'Adres tarifi for Demo1 restaurant',
-    ContactName: 'Ali',
-    ContactPhone: '(345)1267890'
-  };
-
-  var testClient = {
-    Id: 102,
-    Name: 'Demo2',
-    FullName: 'Demo2 A.S.',
-    Phone: '(890)1234567',
-    Phone2: '(890)7654321',
-    Phone3: '(098)1234567',
-    Address: 'Demo Address2',
-    AddressDescription: 'Adres tarifi for Demo2 restaurant',
-    ContactName: 'Veli',
-    ContactPhone: '(543)1267890'
-  };
-
-  var testPackages = [{
-    Id: 1,
-    EntryDate: new Date(),
-    ClientArrivalDate: new Date(),
-    ClientDepartureDate: new Date(),
-    ProposedTotal: 15.15,
-    Total: 16.16,
-    ProposedPaymentMethod: { Id: 1, Name: 'Nakit'},
-    PaymentMethod: { Id: 2, Name: 'Kredi Karti'},
-    DeliveryAddress: 'Flan filan adresi. Sekizinci kat.',
-    ClientNotes: 'Notes client has entered for the order.',
-    Operator: testOperator,
-    Client: testClient,
-    EndUserPhone: '(098)7654321'
-  },{
-    Id: 2,
-    EntryDate: new Date(),
-    ClientArrivalDate: new Date(),
-    ClientDepartureDate: new Date(),
-    ProposedTotal: 23.23,
-    Total: 22.22,
-    ProposedPaymentMethod: { Id: 2, Name: 'Kredi Karti'},
-    PaymentMethod: { Id: 1, Name: 'Nakit'},
-    DeliveryAddress: 'Adres 2.',
-    ClientNotes: 'Notes2 client has entered for the order.',
-    Operator: testOperator2,
-    Client: testClient,
-    EndUserPhone: '(098)7654321'
-  }];
-
+var SERVER_ADDRESS_KEY = 'SERVER_ADDRESS';
 
 // IMPORTANT: Until we figure out a better way to do this, keep this enum in sync
 // with the enums on the server.
@@ -163,17 +88,20 @@ angular.module('starter.controllers', [])
 
 })
 
-.controller('RedirectCtrl', function($rootScope, $scope, $ionicLoading, $ionicHistory, $state, $http, $localstorage, LoginService, CourierService, HttpHeaderService) {
+.controller('RedirectCtrl', function($rootScope, $scope, $ionicLoading, $ionicHistory, $state, $http, $localstorage, ConstantsService, LoginService, CourierService, HttpHeaderService) {
   $scope.$on('$ionicView.enter', function(e) {
-    
+
     $ionicHistory.clearHistory();
-    $ionicHistory.nextViewOptions({
-      disableBack: true
-    });
+    $ionicHistory.nextViewOptions({ disableBack: true });
 
     // Clear the current courier from the root scope
     $rootScope.courier = null;
     $ionicLoading.show(templateOfLoading);
+
+    // Check the webApiAddress
+    var serverAddress = $localstorage.get(SERVER_ADDRESS_KEY, '');
+    if (serverAddress != '')
+      ConstantsService.setWebApiBase(serverAddress);
 
     var credentials = LoginService.loadCredentials();
     var authToken = LoginService.loadAuthToken();
@@ -221,14 +149,29 @@ angular.module('starter.controllers', [])
 
 })
 
-.controller('LoginCtrl', function($scope, $ionicLoading, $ionicHistory, LoginService, $ionicPopup, $state) {
+.controller('LoginCtrl', function($scope, $ionicLoading, $ionicHistory, LoginService, $ionicPopup, $state, ConstantsService, WEB_API_BASE_PROD) {
+
   $scope.data = {};
 
-  // TODO: !!!!!!! Test data
-  $scope.data.userName = 'kurye@pratikkurye.com';
-  $scope.data.password = '1234';
+  $scope.$on('$ionicView.enter', function(e) {
+    // Use Test data unless we are going against prod server
+    if (ConstantsService.webApiBase() != WEB_API_BASE_PROD) {
+      $scope.data.userName = 'kurye@pratikkurye.com';
+      $scope.data.password = '1234';
+    } else {
+      $scope.data.userName = '';
+      $scope.data.password = '';
+    }
+  });
 
   $scope.login = function() {
+
+    if ($scope.data.userName == '' || $scope.data.password == '') {
+      var alertPopup = $ionicPopup.alert({
+          title: 'Eksik Bilgi!',
+          template: 'Lütfen kullanıcı adı ve parolanızı eksiksiz giriniz.'});
+      return;
+    }
 
     $ionicHistory.clearHistory();
     $ionicHistory.nextViewOptions({disableBack: true});
@@ -247,10 +190,34 @@ angular.module('starter.controllers', [])
       $ionicLoading.hide();
       var alertPopup = $ionicPopup.alert({
           title: 'Sisteme girilemedi!',
-          template: 'Girdiginiz bilgileri kontrol edin. Status: ' + String(status) + '. Headers:' + String(headers)
-      });
+          template: 'Girdiginiz bilgileri kontrol edin. Status: ' + String(status) + '. Headers:' + String(headers)});
     });
   }
+})
+
+.controller('LoginDetailsCtrl', function($scope, $ionicHistory, $localstorage, $state, ConstantsService) {
+
+  $scope.data = {};
+
+  $scope.data.serverAddress = '';
+
+  $scope.$on('$ionicView.enter', function(e) {
+    $scope.data.serverAddress = $localstorage.get(SERVER_ADDRESS_KEY, '');
+    if ($scope.data.serverAddress == '')
+      $scope.data.serverAddress = ConstantsService.webApiBase();
+  });
+
+  $scope.saveServerAddress = function() {
+    if ($scope.data.serverAddress == '') {
+      ConstantsService.resetWebApiBase();
+      $localstorage.clear(SERVER_ADDRESS_KEY);
+    } else {
+      ConstantsService.setWebApiBase($scope.data.serverAddress);
+      $localstorage.set(SERVER_ADDRESS_KEY, $scope.data.serverAddress);
+    }
+
+    $ionicHistory.goBack();
+  };
 })
 
 .controller('OrderNotAssignedCtrl', function($rootScope, $scope, $ionicPopup, $ionicHistory, $ionicLoading, $state, CourierService) {
