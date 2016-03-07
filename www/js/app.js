@@ -20,13 +20,14 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services', '
       // org.apache.cordova.statusbar required
       StatusBar.styleDefault();
     }
+
+    $ionicPlatform.on('resume', function(){
+        var alertPopup = $ionicPopup.alert({
+            title: 'Resume!',
+            template: 'Resume happened.'});
+    });
   });
 
-  $ionicPlatform.on('resume', function(){
-      var alertPopup = $ionicPopup.alert({
-          title: 'Resume!',
-          template: 'Resume happened.'});
-  });
 })
 
 .config(function($stateProvider, $urlRouterProvider) {
